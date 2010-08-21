@@ -101,7 +101,7 @@ AppAssistant.prototype.handleCommand = function(event){
 
 AppAssistant.prototype.getPrefs = function () {
 	Relego.prefsCookie = new Mojo.Model.Cookie(Mojo.appInfo.title + ".prefs");
-	var args = Relgo.prefsCookie.get();
+	var args = Relego.prefsCookie.get();
 	if (args) {
 		//Mojo.Log.info("Preferences retrieved from Cookie");
 		for (value in args) {
