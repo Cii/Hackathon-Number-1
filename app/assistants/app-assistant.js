@@ -2,11 +2,11 @@ Relego = {};
 
 //--> Our Stages
 Relego.MainStageName			 	= "Stage";					//--> Our main stage (where we perform, duh!)
-Relego.DashboardStageName		= "Dashboard";			//--> Our dashboard stage (where the bobbleheads go, duh!)
-Relego.Stage					 			= null;
+Relego.DashboardStageName			= "Dashboard";				//--> Our dashboard stage (where the bobbleheads go, duh!)
+Relego.Stage						= null;
 
 //--> Default Values
-Relego.Database					 		= null;							//--> Our database
+Relego.Database				 		= null;						//--> Our database
 
 
 
@@ -20,42 +20,46 @@ AppAssistant.prototype.setup = function(){
 //  -------------------------------------------------------
 //  handleLaunch - called by the framework when the application is asked to launch
 AppAssistant.prototype.handleLaunch = function(launchParams){
-	
-	Mojo.Log.info("*** --> handleLaunch Called");
-		
+	Mojo.Log.error("*** --> handleLaunch Called");
 	var cardStageController = this.controller.getStageController(Relego.MainStageName);
 	var appController = Mojo.Controller.getAppController();
-	
 	Relego.Stage = cardStageController;
 	
-	if (!launchParams)  {
-		//---------------------------------------------------------
-		// FIRST LAUNCH
-		//---------------------------------------------------------
-		if (cardStageController) {
-			// If it exists, just bring it to the front by focusing its window.
-			cardStageController.popScenesTo("main");    
-			cardStageController.activate();
+	try{
+		if (!launchParams)  {
+			//---------------------------------------------------------
+			// FIRST LAUNCH
+			//---------------------------------------------------------
+				if (cardStageController) {
+					Mojo.Log.error("*** --> cardStageController = TRUE. Launch Main");
+					// If it exists, just bring it to the front by focusing its window.
+					cardStageController.popScenesTo("main");    
+					cardStageController.activate();
+				}else{
+					Mojo.Log.error("*** --> cardStageController = FALSE. Launch Main");
+					// Create a callback function to set up the new main stage once it is done loading. It is passed the new stage controller as the first parameter.
+					var pushMainScene = function(stageController) {
+						stageController.pushScene("main");
+					}
+					
+					var stageArguments = {name: Relego.MainStageName, lightweight: false};
+					this.controller.createStageWithCallback(stageArguments, pushMainScene.bind(this), "card");
+				}
 		}else{
-			// Create a callback function to set up the new main stage once it is done loading. It is passed the new stage controller as the first parameter.
-			var pushMainScene = function(stageController){
-				stageController.pushScene("main");
+			Mojo.Log.error("*** --> handleLaunch Called w/ Params: " + launchParams.action);
+			switch (launchParams.action){
+				
+				case "addtorelego":
+					//--> This should auto save the passed along option
+					//--> What params do we need?
+					
+					Mojo.Log.error("*** --> Added to Relogo");
+					break;
 			}
-			
-			var stageArguments = {name: GPSFix.MainStageName, lightweight: false};
-			this.controller.createStageWithCallback(stageArguments, pushMainScene.bind(this), "card");
 		}
-	}else{
-		switch (launchParams.action){
-			//---------------------------------------------------------
-			// PING GPS
-			//---------------------------------------------------------
-			case "addtoreaditlater":
-				//--> This should auto save the passed along option
-				//--> What params do we need?
-				break;
-		}
-	}	
+	}catch(e){
+		Mojo.Log.error("handleLaunch Error: " + e);
+	}
 }
 
 // -----------------------------------------

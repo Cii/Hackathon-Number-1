@@ -1,1 +1,16 @@
 /* Style it here */
+
+
+/* article-list scene */
+.article-list .palm-row .subtitle {
+	color: gray;
+	padding: 0 5px 0 5px !important;
+}
+
+.article-list .unread .article-title {
+	font-weight: bold;
+}
+
+.article-list .read .article-title {
+}
+
