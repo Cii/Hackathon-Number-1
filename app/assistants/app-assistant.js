@@ -13,7 +13,7 @@ Relego.Stage						= null;
 Relego.Database					 		= dbInstance({'name': Relego.db.info.name, 'version': Relego.db.info.version});	//--> Our database; use Relego.Database.get_connection()
 
 Relego.prefs = {
-    email: "none entered",
+    email: "",
     password: "",
     allowRotate: false
 };
@@ -28,7 +28,7 @@ AppAssistant.prototype.setup = function(){
 	if (true) {
 		this.createDbSchema();
 	}
-}
+};
 
 //  -------------------------------------------------------
 //  handleLaunch - called by the framework when the application is asked to launch
@@ -53,7 +53,7 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 					// Create a callback function to set up the new main stage once it is done loading. It is passed the new stage controller as the first parameter.
 					var pushMainScene = function(stageController) {
 						stageController.pushScene("main");
-					}
+					};
 					
 					var stageArguments = {name: Relego.MainStageName, lightweight: false};
 					this.controller.createStageWithCallback(stageArguments, pushMainScene.bind(this), "card");
@@ -73,7 +73,7 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 	}catch(e){
 		Mojo.Log.error("handleLaunch Error: " + e);
 	}
-}
+};
 
 // -----------------------------------------
 // handleCommand - called to handle app menu selections
@@ -94,7 +94,7 @@ AppAssistant.prototype.handleCommand = function(event){
 
         }
     }
-}
+};
 
 
 // -----------------------------------------
@@ -102,18 +102,19 @@ AppAssistant.prototype.handleCommand = function(event){
 // load prefs to global prefs object
 
 AppAssistant.prototype.getPrefs = function () {
+	Mojo.Log.info("Getting prefs");
 	Relego.prefsCookie = new Mojo.Model.Cookie(Mojo.appInfo.title + ".prefs");
 	var args = Relego.prefsCookie.get();
 	if (args) {
-		//Mojo.Log.info("Preferences retrieved from Cookie");
+		Mojo.Log.info("Preferences retrieved from Cookie");
 		for (value in args) {
 			Relego.prefs[value] = args[value];
 		}
 	}
 	else {
-		//Mojo.Log.info("PREFS LOAD FAILURE!!!");
+		Mojo.Log.info("PREFS LOAD FAILURE!!!");
 	}
-	//Mojo.Log.info("Prefs: %j", Relego.prefs);
+	Mojo.Log.info("Prefs: %j", Relego.prefs);
 };
 
 AppAssistant.prototype.createDbSchema = function() {

@@ -42,6 +42,7 @@ PrefsAssistant.prototype.deactivate = function(event) {
 	Relego.prefs.allowRotate = this.allowRotateModel.value;
 	
 	// Save global prefs object to cookie.
+	Relego.prefsCookie = new Mojo.Model.Cookie(Mojo.appInfo.title + ".prefs");
 	Relego.prefsCookie.put(Relego.prefs);
 	
 };

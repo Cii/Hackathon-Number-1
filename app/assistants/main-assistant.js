@@ -20,8 +20,10 @@ MainAssistant.prototype.setup = function()
 			reorderable: true,
 			filterFunction: this.filterArticles.bind(this),
 			formatters: {
-//				toggleText: function(v, m) { if(m.state == 1) m.toggleText = "Unread"; else m.toggleText = "Read"; }
-				unread: function(v, m) { if(m.state == 0) m.unread = "unread"; },
+//				toggleText: function(v, m) { if(m.state === 1){ m.toggleText = "Unread"; else m.toggleText = "Read";} }
+				unread: function(v, m) { if (m.state === 0) {
+					m.unread = "unread";
+				}}
 			}
 		}, this.articleModel = {});
 		
@@ -58,8 +60,35 @@ MainAssistant.prototype.setup = function()
 		this.controller.listen("article-list", Mojo.Event.listTap, this.listTap);
 		
 		this.controller.setMenuVisible(Mojo.Menu.commandMenu, false);
+		
+		this.controller.setupWidget(Mojo.Menu.appMenu, {
+				omitDefaultItems: true
+			},
+			{
+				visible: true,
+				items: [
+					Mojo.Menu.editItem,
+					{label: $L('Preferences & Accounts') + "...", command: 'prefs', disabled: false},
+					Mojo.Menu.helpItem
+				]
+			}
+		);
+		
 	};
 	
+MainAssistant.prototype.activate = function (event) {
+	//Mojo.Log.info("Rotate:", Relego.prefs.allowRotate);
+	if (Relego.prefs.allowRotate) {
+		this.controller.stageController.setWindowOrientation("free");
+		//Mojo.Log.info("Rotate FREE!");
+	}
+	else {
+		this.controller.stageController.setWindowOrientation("up");
+		//Mojo.Log.info("Rotate UP!");
+	}
+	
+};
+
 MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
 };
@@ -92,13 +121,14 @@ MainAssistant.prototype.showItems = function(state) {
 MainAssistant.prototype.filterArticles = function(filterString, listWidget, offset, count)
 {
 	filterString = filterString.toLowerCase();
-	var results = new Array();
+	var results = [];
 	var totalResultsSize = 0;
 	var items = this.articleModel.items;
 	for (var i = 0; i < items.length; i++) {
 		if (items[i].title.toLowerCase().indexOf(filterString) != -1 || items[i].url.toLowerCase().indexOf(filterString) != -1) {
-			if(results.length < count && totalResultsSize >= offset)
+			if (results.length < count && totalResultsSize >= offset) {
 				results.push(items[i]);
+			}
 			totalResultsSize++;
 		}
 	}
