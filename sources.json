@@ -18,4 +18,8 @@
         "scenes": "textonly",
         "source": "app/assistants/textonly-assistant.js"
     },
+    {
+        "scenes": "auth",
+        "source": "app/assistants/auth-assistant.js"
+    }
 ]

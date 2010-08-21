@@ -37,6 +37,7 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 	var cardStageController = this.controller.getStageController(Relego.MainStageName);
 	var appController = Mojo.Controller.getAppController();
 	Relego.Stage = cardStageController;
+	var sceneToPush = (Relego.prefs.email === "") ? "auth" : "main";
 	
 	try{
 		if (!launchParams)  {
@@ -46,13 +47,13 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 				if (cardStageController) {
 					Mojo.Log.error("*** --> cardStageController = TRUE. Launch Main");
 					// If it exists, just bring it to the front by focusing its window.
-					cardStageController.popScenesTo("main");    
+					cardStageController.popScenesTo(sceneToPush);
 					cardStageController.activate();
 				}else{
 					Mojo.Log.error("*** --> cardStageController = FALSE. Launch Main");
 					// Create a callback function to set up the new main stage once it is done loading. It is passed the new stage controller as the first parameter.
 					var pushMainScene = function(stageController) {
-						stageController.pushScene("main");
+						stageController.pushScene(sceneToPush);
 					};
 					
 					var stageArguments = {name: Relego.MainStageName, lightweight: false};
@@ -88,7 +89,7 @@ AppAssistant.prototype.handleCommand = function(event){
         	case "about":
 				stageController.pushScene("about");
 				break;
-		case "prefs":
+			case "prefs":
 				stageController.pushScene("prefs");
 				break;
 

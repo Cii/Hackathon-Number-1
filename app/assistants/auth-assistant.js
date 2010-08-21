@@ -73,7 +73,7 @@ AuthAssistant.prototype = {
   },
 
   authSuccess: function () {
-    // push main scene
+    this.controller.swapScene("main");
   },
 
   authFail: function (code, message, description) {
@@ -86,7 +86,7 @@ AuthAssistant.prototype = {
   },
 
   registerSuccess: function () {
-    // push main scene
+    this.controller.swapScene("main");
   },
 
   registerFail: function (code, message, description) {
