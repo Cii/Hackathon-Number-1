@@ -40,7 +40,7 @@ var API = {
    * The User object associated with the remote service the API is currently
    * talking to.
    */
-  user : null;
+  user : null,
 
 
   // -------------------------------- METHODS ---------------------------------
