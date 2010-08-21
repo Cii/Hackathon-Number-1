@@ -8,5 +8,13 @@
 	"Unread" : "Ungelesen",
 	"Yes" : "Ja",
 	"No" : "No",
-	"Articles" : "Artikel"
+	"Articles" : "Artikel",
+	"Request was successful" : "Anforderung war erfolgreich",
+	"Invalid request, please make sure you follow the documentation for proper syntax" : "Falsche Anforderung, bitte überprüfen Sie die Syntax",
+	"Username and/or password is incorrect" : "Benutzer und/oder Passwort falsch",
+	"Rate limit exceeded, please wait a little bit before resubmitting" : "Limite überschritten, bitte warten Sie bevor Sie es erneut versuchen",
+	"Read It Later\'s sync server is down for scheduled maintenance" : "Read It Later\'s Sync Server ist inaktiv für Wartung",
+	"Relego for webOS" : "Relego für webOS",
+	"This is a quick description of Relego" : "Dies ist eine kurze Beschreibung von Relego",
+	"Login or Create a new account" : "Loggen Sie sich ein oder erstellen Sie ein neues Konto"
 }

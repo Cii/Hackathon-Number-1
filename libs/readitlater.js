@@ -36,11 +36,11 @@ var ReadItLater = function(opts) {
 
 
 ReadItLater.prototype.status_codes = {
-	'200':'Request was successful',
-	'400':'Invalid request, please make sure you follow the documentation for proper syntax',
-	'401':'Username and/or password is incorrect',
-	'403':'Rate limit exceeded, please wait a little bit before resubmitting',
-	'503':'Read It Later\'s sync server is down for scheduled maintenance'
+	'200': $L('Request was successful'),
+	'400': $L('Invalid request, please make sure you follow the documentation for proper syntax'),
+	'401': $L('Username and/or password is incorrect'),
+	'403': $L('Rate limit exceeded, please wait a little bit before resubmitting'),
+	'503': $L('Read It Later\'s sync server is down for scheduled maintenance')
 };
 
 ReadItLater.prototype.baseURL = 'https://readitlaterlist.com/v2';
