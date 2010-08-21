@@ -6,6 +6,8 @@ MainAssistant.prototype.currentState = 0;
 
 MainAssistant.prototype.setup = function()
 {
+		this.controller.window.setTimeout(this.loadDbScreen.bind(this),1500);
+		
 		this.controller.setupWidget("article-list", {
 			itemTemplate: "main/relegoRowTemplate",
 			reorderable: true,
@@ -17,7 +19,7 @@ MainAssistant.prototype.setup = function()
 		}, this.articleModel = {});
 		
 		this.controller.setupWidget(Mojo.Menu.commandMenu, {}, {
-		        visible: true,
+		        visible: false,
 		        items: [
 					{},
 					{ 
@@ -30,7 +32,7 @@ MainAssistant.prototype.setup = function()
 		        ]
 		    }
 		);
-
+		
 		// dummy data:
 		var dummy = [{
 				title: "Article #1, unread",
@@ -47,6 +49,8 @@ MainAssistant.prototype.setup = function()
 		
 		this.listTap = this.listTap.bindAsEventListener(this);
 		this.controller.listen("article-list", Mojo.Event.listTap, this.listTap);
+		
+		this.controller.setMenuVisible(Mojo.Menu.commandMenu, false);
 	};
 	
 MainAssistant.prototype.cleanup = function() {
@@ -101,3 +105,21 @@ MainAssistant.prototype.listTap = function(event)
 	var url = event.item.url;
 	// launch read scene
 }; 
+
+var screenOpacity = 1;
+MainAssistant.prototype.loadDbScreen = function()
+{	
+	var dbScreenElement = this.controller.get("loadingScreen");
+	screenOpacity = screenOpacity - 0.02;
+	dbScreenElement.style.opacity = screenOpacity;			
+	
+	if(screenOpacity < 0.2)
+	{
+		dbScreenElement.hide();
+		this.controller.setMenuVisible(Mojo.Menu.commandMenu, true);
+	}
+	else
+	{
+		this.controller.window.setTimeout(this.loadDbScreen.bind(this), 10);
+	}
+};		
