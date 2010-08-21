@@ -1,4 +1,9 @@
-Relego = {};
+//Relego = {}; // Moved into Relego.js
+
+/* Added DB helper stuff from webOS101 */
+var dbColumn = Relego.db.dbColumn;
+var dbTable = Relego.db.dbTable;
+var dbInstance = Relego.db.dbInstance;
 
 //--> Our Stages
 Relego.MainStageName			 	= "Stage";					//--> Our main stage (where we perform, duh!)
@@ -6,14 +11,13 @@ Relego.DashboardStageName		= "Dashboard";			//--> Our dashboard stage (where the
 Relego.Stage					 			= null;
 
 //--> Default Values
-Relego.Database					 		= null;							//--> Our database
-
-
+Relego.Database					 		= null	//--> Our database
 
 function AppAssistant(appController){
 }
 AppAssistant.prototype.setup = function(){
 	//this.handleLaunch();
+	Relego.Database = dbInstance({'name': Relego.db.info.name}, {'version': Relego.db.info.version});
 	Relego.Metrix = new Metrix();
 }
 

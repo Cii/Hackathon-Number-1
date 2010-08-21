@@ -1,9 +1,11 @@
 [
+    {"source": "app/models/app/debug.js"},
+    {"source": "app/models/Relego.js"},
     {"source": "app/assistants/app-assistant.js"},
     {"source": "app/assistants/stage-assistant.js"},
     {"source": "app\/models\/metrix.js"},
     {"source": "app\/models\/asyncWrappers.js"},
-		{
+	{
         "scenes": "main",
         "source": "app/assistants/main-assistant.js"
     }
