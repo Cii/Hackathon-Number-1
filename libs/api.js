@@ -149,15 +149,8 @@ var API = {
    */
   addBookmark : function(inBookmark, inSuccess, inFailure) {
 
-    	var data={
-	    "0":{
-		"url":inBookmark.url,
-		"title":inBookMark.title
-	    	}
-	}
-
 	var opts={
-		new: data,
+		'new': inBookmark.toJSON(),
 		onSuccess: inSuccess,
 		onFailure: inFailure
 	}
