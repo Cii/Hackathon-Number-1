@@ -10,6 +10,7 @@
     "theme": "light",
 	"noWindow": "true",
     "smallicon": "icon32x32.png",
+	"splashBackground": "images/relegoSplash.png",
     "copyright": "© Copyright 2010 webOSroundup",
     "support": {
         "url": "http://www.webOSroundup.com",
