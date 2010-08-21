@@ -66,6 +66,8 @@ var API = {
           apikey : this.apiKey
         });
       break;
+    }
+
 
   }, // End setSetvice().
 
