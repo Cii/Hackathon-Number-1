@@ -6,6 +6,9 @@ MainAssistant.prototype.currentState = 0;
 
 MainAssistant.prototype.setup = function()
 {
+
+		this.controller.get('main_title').update($L("Articles"));
+
 		this.controller.window.setTimeout(this.loadDbScreen.bind(this),1500);
 		
 		this.controller.setupWidget(Mojo.Menu.appMenu, {omitDefaultItems: true}, {
