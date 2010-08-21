@@ -94,6 +94,8 @@ var API = {
         inFailure(inResponse.code, inResponse.message, inResponse.description);
       }
 
+    }
+
   }, // End verifyAccount().
 
 
@@ -117,6 +119,8 @@ var API = {
       onFailure : function(inResponse) {
         inFailure(inResponse.code, inResponse.message, inResponse.description);
       }
+
+    }
 
   }, // End createAccount().
 
