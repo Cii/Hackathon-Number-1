@@ -1,6 +1,24 @@
 /**
  * a library to interact with the ReadItLater API
  * 
+ * Example:
+ * 
+ * 	var ril = new ReadItLater({
+ *  	username  :'foo',
+ *  	'password':'bar',
+ *  	'apikey'  :'XXXXXXXXXXXXXXXXXXXXXXXXX'
+ *  });
+ *  
+ *  ril.add({
+ *  	'url':'http://www.cerias.purdue.edu/',
+ *  	onSuccess:function(resp_data, xhr) {
+ *  		alert('yay! '+resp_data);
+ *  	},
+ *  	onFailure:function(err_obj, xhr) {
+ *  		alert('nay! '+err_obj.message+'\n'+err_obj.description);
+ *  	}
+ *  });
+ * 
  * As written, this library requires PrototypeJS. see ReadItLater._defaults and ReadItLater._getMethodUrl
  * 
  * @param {Object} opts options 
@@ -54,7 +72,7 @@ ReadItLater.prototype.getCredentials = function() {
 };
 
 /**
- * set credentials manually 
+ * set credentials manually
  */
 ReadItLater.prototype.setCredentials = function(username, password, apikey) {
 	this.opts.username = username;
@@ -164,15 +182,35 @@ ReadItLater.prototype.get = function(opts) {
 	});
 	
 };
+
+/**
+ * Retrieve information about a user's list 
+ * @TODO
+ */
 ReadItLater.prototype.stats = function(opts) {};
 
+/**
+ * Verify a user's account 
+ * @TODO
+ */
 ReadItLater.prototype.authenticate = function(opts) {};
+
+/**
+ * Register a new user 
+ * @TODO
+ */
 ReadItLater.prototype.signup = function(opts) {};
 
-
+/**
+ * Get the text only version of a url 
+ * @TODO
+ */
 ReadItLater.prototype.text = function(opts) {};
 
-
+/**
+ * Return stats / current rate limit information about your API key 
+ * @TODO
+ */
 ReadItLater.prototype.api = function(opts) {};
 
 /**
@@ -237,6 +275,9 @@ ReadItLater.prototype._getMethodUrl = function(method) {
 	}
 };
 
+/**
+ * takes a hash of params and inserts the username, password and apikey 
+ */
 ReadItLater.prototype.addCredentialsToParams = function(params) {
 	var credentials = this.getCredentials();
 	params.username = credentials.username;
@@ -245,6 +286,9 @@ ReadItLater.prototype.addCredentialsToParams = function(params) {
 	return params;
 };
 
+/**
+ * a utility to handle options hash defaults 
+ */
 ReadItLater.prototype._defaults = function(defaults, args) {
 	if (!args) { args = {}; }
 	if (!defaults) { defaults = {}; }
