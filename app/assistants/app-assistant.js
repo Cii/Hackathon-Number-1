@@ -131,6 +131,22 @@ AppAssistant.prototype.createDbSchema = function() {
 				'type': 'TEXT'
 			}),
 			dbColumn({
+				'name': 'title',
+				'type': 'TEXT'
+			}),
+			dbColumn({
+				'name': 'pageText',
+				'type': 'TEXT'
+			}),
+			dbColumn({
+				'name': 'tags',
+				'type': 'TEXT'
+			}),
+			dbColumn({
+				'name': 'favorite',
+				'type': 'INTEGER'
+			}),
+			dbColumn({
 				'name': 'read',
 				'type': 'INTEGER'
 			})

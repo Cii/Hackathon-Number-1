@@ -1,8 +1,8 @@
 [
     {"source": "app/models/Relego.js"},
+    {"source": "app/models/debug.js"},
     {"source": "libs/api.js"},
     {"source": "libs/readitlater.js"},
-    {"source": "app/models/Relego.js"},
     {"source": "app/assistants/app-assistant.js"},
     {"source": "app\/models\/metrix.js"},
     {"source": "app\/models\/asyncWrappers.js"},
