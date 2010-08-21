@@ -13,5 +13,9 @@
     {
         "scenes": "prefs",
         "source": "app/assistants/prefs-assistant.js"
-    }
+    },
+    {
+        "scenes": "textonly",
+        "source": "app/assistants/textonly-assistant.js"
+    },
 ]

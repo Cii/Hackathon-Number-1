@@ -160,3 +160,35 @@ MainAssistant.prototype.loadDbScreen = function()
 		this.controller.window.setTimeout(this.loadDbScreen.bind(this), 10);
 	}
 };		
+
+var AddBookmarkAssistant = Class.create({
+	initialize: function(ass) {
+		this.assistant = ass;
+		this.controller = ass.controller;
+	},
+	
+	setup: function(widget) {
+		this.widget = widget;
+		
+		this.controller.setupWidget("urlField", {hintText: "URL"}, this.urlModel = { value: ""});
+		this.controller.setupWidget("addButton", {label: "Add Bookmark", type: Mojo.Widget.activityButton}, {buttonClass: "affirmative"});
+		this.controller.setupWidget("cancelButton", {label: "Cancel"}, {});
+		
+		this.controller.listen("addButton", Mojo.Event.tap, this.ladd = this.add.bindAsEventListener(this));
+		this.controller.listen("cancelButton", Mojo.Event.tap, this.lcancel = this.cancel.bindAsEventListener(this));
+	},
+	
+	cleanup: function() {
+		this.controller.stopListening("addButton", Mojo.Event.tap, this.ladd);
+		this.controller.stopListening("cancelButton", Mojo.Event.tap, this.lcancel);		
+	},
+	
+	add: function() {
+		this.assistant.addBookmark(this.urlModel.value);
+		this.widget.mojo.close();
+	},
+	
+	cancel: function() {
+		this.widget.mojo.close();
+	}
+});
