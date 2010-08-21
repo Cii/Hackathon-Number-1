@@ -1,9 +1,8 @@
-Relego = {};
-
 /* Added DB helper stuff from webOS101 - should be in stage controller*/
-/*var dbColumn = Relego.db.dbColumn;
+
+var dbColumn = Relego.db.dbColumn;
 var dbTable = Relego.db.dbTable;
-var dbInstance = Relego.db.dbInstance;*/
+var dbInstance = Relego.db.dbInstance;
 
 //--> Our Stages
 Relego.MainStageName			 	= "Stage";					//--> Our main stage (where we perform, duh!)
@@ -11,7 +10,7 @@ Relego.DashboardStageName			= "Dashboard";				//--> Our dashboard stage (where t
 Relego.Stage						= null;
 
 //--> Default Values
-Relego.Database				 		= null;						//--> Our database
+Relego.Database					 		= dbInstance({'name': Relego.db.info.name, 'version': Relego.db.info.version});	//--> Our database; use Relego.Database.get_connection()
 
 Relego.prefs = {
     email: "none entered",
@@ -23,9 +22,13 @@ function AppAssistant(appController){
 }
 AppAssistant.prototype.setup = function(){
 	//this.handleLaunch();
-	//Relego.Database = dbInstance({'name': Relego.db.info.name}, {'version': Relego.db.info.version}); // this needs to be run in the stage controller
+	Relego.Database = dbInstance({'name': Relego.db.info.name}, {'version': Relego.db.info.version}); // this needs to be run in the stage controller
 	Relego.Metrix = new Metrix();
 	this.getPrefs();
+	// if this is the first time the app has ever run, make the database
+	if (true) {
+		this.createDbSchema();
+	}
 }
 
 //  -------------------------------------------------------
@@ -112,4 +115,26 @@ AppAssistant.prototype.getPrefs = function () {
 		//Mojo.Log.info("PREFS LOAD FAILURE!!!");
 	}
 	//Mojo.Log.info("Prefs: %j", Relego.prefs);
+};
+
+AppAssistant.prototype.createDbSchema = function() {
+	var pagesTable = dbTable({
+		'name': 'pages',
+		'columns': [
+			dbColumn({
+				'name': 'id',
+				'type': 'INTEGER',
+				'constraints': ['PRIMARY KEY']
+			}),
+			dbColumn({
+				'name': 'url',
+				'type': 'TEXT'
+			}),
+			dbColumn({
+				'name': 'read',
+				'type': 'INTEGER'
+			})
+		]
+	});
+	Relego.Database.add_table(pagesTable);
 };
