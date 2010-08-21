@@ -8,6 +8,10 @@ MainAssistant.prototype.setup = function()
 {
 		this.controller.window.setTimeout(this.loadDbScreen.bind(this),1500);
 		
+		this.controller.setupWidget(Mojo.Menu.appMenu, {omitDefaultItems: true}, {
+			items: [Mojo.Menu.prefsItem, Mojo.Menu.helpItem]
+		});
+		
 		this.controller.setupWidget("article-list", {
 			itemTemplate: "main/relegoRowTemplate",
 			reorderable: true,
