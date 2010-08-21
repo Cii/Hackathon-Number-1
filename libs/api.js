@@ -53,9 +53,7 @@ var API = {
    *                       attributes section.
    * @param inUser         A User object describing the user.
    */
-  setService : function(inWhichService, inUser) {
-
-    this.user = inUser;
+  setService : function(inWhichService) {
 
     switch (inWhichService) {
       case this.SERVICE_READ_IT_LATER:
@@ -78,7 +76,9 @@ var API = {
    * @param inSuccess Callback function for a successful call.
    * @param inFailure Callback function for a failed call.
    */
-  verifyAccount : function(inUser) {
+  verifyAccount : function(inUser,inSuccess,inFailure) {
+
+    this.user = inUser;
 
     this.library.setCredentials(this.user.username, this.user.password,
       this.apiKey);
