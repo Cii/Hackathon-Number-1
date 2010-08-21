@@ -66,7 +66,7 @@ var API = {
           apikey : this.apiKey
         });
       break;
-
+    }
   }, // End setSetvice().
 
 
@@ -91,6 +91,7 @@ var API = {
       onFailure : function(inResponse) {
         inFailure(inResponse.code, inResponse.message, inResponse.description);
       }
+    });
 
   }, // End verifyAccount().
 
@@ -115,7 +116,7 @@ var API = {
       onFailure : function(inResponse) {
         inFailure(inResponse.code, inResponse.message, inResponse.description);
       }
-
+    });
   }, // End createAccount().
 
 
@@ -132,7 +133,7 @@ var API = {
         var opts={
 		onSuccess: inSuccess,
 		onFailure: inFailure
-	}
+	};
 
 	this.library.get(opts);
 
@@ -153,7 +154,7 @@ var API = {
 		'new': inBookmark.toJSON(),
 		onSuccess: inSuccess,
 		onFailure: inFailure
-	}
+	};
 
 	this.library.send(opts);
 
@@ -279,7 +280,7 @@ var Bookmark = function(inData) {
   this.url = inData.url;
   this.timeAdded = inData.timeAdded;
   this.readStatus = inData.readStatus;
-  this.tags = [ ] = inData.tags;
+  this.tags = inData.tags;
 
 
   /**
