@@ -1,3 +1,11 @@
 {
-	"Add..." : "Hinzufügen..."
+	"Add..." : "Hinzufügen...",
+	"Username" : "Benutzer",
+	"Password" : "Passwort",
+	"Continue" : "weiter",
+	"This username is alread taken or you've provided an incorrect password. Please try again." : "Dieser Benutzer ist schon verwendet oder das Passwort war falsch. Bitte versuchen Sie es nocheinmal.",
+	"Read" : "Gelesen",
+	"Unread" : "Ungelesen",
+	"Yes" : "Ja",
+	"No" : "No"
 }

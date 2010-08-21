@@ -10,7 +10,7 @@ AuthAssistant.prototype = {
   setup: function () {
 
     this.usernameModel = {
-      hintText: 'Username',
+      hintText: $L('Username'),
       multiline:    false,
       disabledProperty: 'disabled',
       focus: true,
@@ -18,7 +18,7 @@ AuthAssistant.prototype = {
     };
 
     this.passwordModel = {
-      hintText: 'Password',
+      hintText: $L('Password'),
       multiline:    false,
       disabledProperty: 'disabled',
       changeOnKeyPress: true
@@ -35,7 +35,7 @@ AuthAssistant.prototype = {
     this.controller.get('spinnerScrim').hide();
 
     // setting up the login button
-    this.controller.setupWidget("authBtn", null, { label: "Continue" });
+    this.controller.setupWidget("authBtn", null, { label: $L("Continue") });
 
     // listener for the button
     Mojo.Event.listen(this.controller.get('authBtn'), Mojo.Event.tap, this.authenticate.bind(this));
@@ -93,7 +93,7 @@ AuthAssistant.prototype = {
 
     // the username is already taken
     if (code === "401") {
-      this.controller.showErrorDialog("This username is alread taken or you've provided an incorrect password. Please try again.");
+      this.controller.showErrorDialog($L("This username is alread taken or you've provided an incorrect password. Please try again."));
     }
 
     this.spinnerModel.spinning = false;

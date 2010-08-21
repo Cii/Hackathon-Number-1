@@ -25,8 +25,8 @@ MainAssistant.prototype.setup = function()
 					{ 
 						toggleCmd: "show-unread",
 						items: [
-							{ label: "Unread", command: "show-unread" },
-			         		{ label: "Read", command: "show-read" }
+							{ label: $L("Unread"), command: "show-unread" },
+			         		{ label: $L("Read"), command: "show-read" }
 						]},
 					{}
 		        ]
