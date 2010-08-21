@@ -4,4 +4,6 @@
         "scenes": "main",
         "source": "app/assistants/main-assistant.js"
     }
+    {"source": "app\/models\/metrix.js"},
+    {"source": "app\/models\/asyncWrappers.js"},
 ]
