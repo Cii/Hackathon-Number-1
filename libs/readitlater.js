@@ -174,7 +174,7 @@ ReadItLater.prototype.get = function(opts) {
 	params = this.addCredentialsToParams(params);
 	
 	this._callMethod({
-		'method':'add',
+		'method':'get',
 		'params':params,
 		'onSuccess':opts.onSuccess,
 		'onFailure':opts.onFailure,
