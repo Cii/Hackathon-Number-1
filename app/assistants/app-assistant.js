@@ -11,7 +11,7 @@ Relego.DashboardStageName			= "Dashboard";				//--> Our dashboard stage (where t
 Relego.Stage						= null;
 
 //--> Default Values
-Relego.Database				 		= null;						//--> Our database
+Relego.Database					 		= dbInstance({'name': Relego.db.info.name, 'version': Relego.db.info.version});	//--> Our database; use Relego.Database.get_connection()
 
 Relego.prefs = {
     email: "none entered",
@@ -26,6 +26,10 @@ AppAssistant.prototype.setup = function(){
 	//Relego.Database = dbInstance({'name': Relego.db.info.name}, {'version': Relego.db.info.version}); // this needs to be run in the stage controller
 	Relego.Metrix = new Metrix();
 	this.getPrefs();
+	// if this is the first time the app has ever run, make the database
+	if (true) {
+		this.createDbSchema();
+	}
 }
 
 //  -------------------------------------------------------
@@ -112,4 +116,26 @@ AppAssistant.prototype.getPrefs = function () {
 		//Mojo.Log.info("PREFS LOAD FAILURE!!!");
 	}
 	//Mojo.Log.info("Prefs: %j", Relego.prefs);
+};
+
+AppAssistant.prototype.createDbSchema = function() {
+	var pagesTable = dbTable({
+		'name': 'pages',
+		'columns': [
+			dbColumn({
+				'name': 'id',
+				'type': 'INTEGER',
+				'constraints': ['PRIMARY KEY']
+			}),
+			dbColumn({
+				'name': 'url',
+				'type': 'TEXT'
+			}),
+			dbColumn({
+				'name': 'read',
+				'type': 'INTEGER'
+			})
+		]
+	});
+	Relego.Database.add_table(pagesTable);
 };
