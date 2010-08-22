@@ -7,7 +7,6 @@
     "main": "index.html",
     "title": "Relego",
     "icon": "icon.png",
-    "theme": "light",
 	"noWindow": "true",
     "smallicon": "icon32x32.png",
 	"splashBackground": "images/relegoSplash.png",
