@@ -87,5 +87,19 @@ body.palm-default.palm-dark {
 }
 .header-cal-source:active	{-webkit-border-image: url(../images/cal-selector-headerpress-gray.png) 0 22 0 16 stretch stretch;}
 
+.easterEggImage {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	opacity: 0;
+	-webkit-transition-property: opacity z-index;
+	-webkit-transition-duration: 2s;
+	z-index: -1;
+}
+
+.easterEggImage.show {
+	opacity: 1;
+	z-index: 100;
+}
 
 
