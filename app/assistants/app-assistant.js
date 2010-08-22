@@ -182,6 +182,10 @@ AppAssistant.prototype.createDbSchema = function() {
 				'constraints': ['PRIMARY KEY']
 			}),
 			dbColumn({
+				'name': 'lastUpdate',
+				'type': 'INTEGER'
+			}),
+			dbColumn({
 				'name': 'url',
 				'type': 'TEXT'
 			}),

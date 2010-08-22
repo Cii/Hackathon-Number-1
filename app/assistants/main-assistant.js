@@ -184,10 +184,7 @@ MainAssistant.prototype.showItems = function(state) {
 		}
 	}, this);
 	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
-	debugString('INSTANTIATING CHILD WIDGETS');
 	this.controller.instantiateChildWidgets(document);
-	debugString('LISTENING ON CHILD WIDGETS?');
-	//Mojo.Event.listen(this.controller.get('cacheButton'), Mojo.Event.tap, this.cachePage.bindAsEventListener(this));
 	$A(this.controller.select('.cacheButton')).each(function(item, index) {
 		if (!item.stopListening) {
 			Mojo.Event.listen(item, Mojo.Event.tap, this.cachePageHandler);
@@ -334,12 +331,43 @@ var AddBookmarkAssistant = Class.create({
 });
 
 MainAssistant.prototype.cachePage = function(event) {
-	debugString('ATTEMPTING TO CACHE PAGE');
-	debugObject(event.currentTarget);
-	//var url = event.item.url;
-	// get the url  from event and
-	// Ajax the page contents
-	// on success, store the info in the db
+	var request, selectSql;
+	var item = this.controller.get('article-list').mojo.getItemByNode(event.currentTarget);
+	var db = Relego.Database;
+	var table = db.get_schema().pages.table;
+	var record = {
+		'id': item.itemID,
+		'url': item.url,
+		'title': item.title,
+		'lastUpdate': Math.round(new Date().getTime() / 1000.0),
+		'tags': item.tags,
+		'favorite': 0,
+		'read': 0
+	};
+	request = new Ajax.Request(item.url, {
+		'method': 'get',
+		'evalJSON': false,
+		'onSuccess': function(response) {
+			// update the records pageText
+			record.pageText = response.responseText;
+			// store to db
+			selectSql = table.get_insertSql(record);
+			db.get_connection().transaction(function(transaction) {
+				transaction.executeSql(typeof(selectSql) === 'string' ? selectSql : selectSql[0], typeof(selectSql) === 'string' ? [] : selectSql[1],
+															function(transaction, results) {
+																// set some sort of cached property for visual indicator/code decision?
+															}.bind(this),
+															function(transaction, error) {
+																debugError('cache fatality', 'CANNOT INSERT RECORD: ' + error.message);
+															}.bind(this)
+				);
+			});
+		}.bind(this),
+		'onFailure': function(response) {
+			// LAME
+			debugError('cache fatality', 'COULD NOT REACH URL');
+		}.bind(this)
+	});
 	
 	event.stop();
 };
