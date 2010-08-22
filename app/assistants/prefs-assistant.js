@@ -79,6 +79,25 @@ PrefsAssistant.prototype.setup = function() {
 	this.editAccountHandler = this.editAccount.bind(this);
 	this.controller.listen('EditAccountButtonId', Mojo.Event.tap, this.editAccountHandler);
 
+	this.changeThemeHandler = this.changeTheme.bindAsEventListener(this);
+	this.controller.listen('themeSelectorId', Mojo.Event.propertyChange, this.changeThemeHandler);
+
+};
+
+PrefsAssistant.prototype.changeTheme = function (event) {
+	// Change theme based on prefs (required in each scene!
+	
+	if (event) {
+		Relego.prefs.theme = this.themeSelectorModel.value;
+	}
+	var bodyDiv = this.controller.document.getElementsByTagName('body')[0];
+	if (Relego.prefs.theme === 'light') {
+		bodyDiv.removeClassName('palm-dark');
+	}else
+	{
+		bodyDiv.addClassName('palm-dark');
+	}
+	
 };
 
 PrefsAssistant.prototype.editAccount = function (event) {
@@ -89,6 +108,8 @@ PrefsAssistant.prototype.editAccount = function (event) {
 PrefsAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
+
+	this.changeTheme();
 };
 
 PrefsAssistant.prototype.deactivate = function(event) {
@@ -112,6 +133,8 @@ PrefsAssistant.prototype.cleanup = function(event) {
 
 	// for the secret thing
 	Mojo.Event.stopListening(this.controller.sceneElement, Mojo.Event.keypress, this.keyPressHandler);
+	this.controller.stopListening('EditAccountButtonId', Mojo.Event.tap, this.editAccountHandler);
+	this.controller.stopListening('themeSelectorId', Mojo.Event.propertyChange, this.changeThemeHandler);
 };
 
 PrefsAssistant.prototype.keyPress = function(event) {
