@@ -1,10 +1,14 @@
 <div id="main">
 	<div id="loadingScreen"  style="width: 320px; height: 480px; z-index: 999; background: url(images/relegoSplash.png) no-repeat; position: absolute;"></div>
-	<div class="palm-page-header">
-		<div class="palm-page-header-wrapper">
-			<div class="icon preferences" style="background-image: url(icon32x32.png);"></div>
-			<div class="title" id="main_title">Articles</div>
-		</div>
+	<div class="palm-header left" style='z-index: 900'>
+	
+		<div id='filterView' class='header-cal-source'>
+			<div id='currentFilterView' class='header-cal-selector'>All</div>
+			<div class="header-cal-source-hit-target"></div>
+		</div>	
+		<div class="icon preferences" style="background-image: url(icon32x32.png);"></div>
+		<div class="title" id="main_title">Articles</div>
 	</div>
+	<br/><br/>
 	<div id="article-list" class="article-list" x-mojo-element="FilterList"></div>
 </div>

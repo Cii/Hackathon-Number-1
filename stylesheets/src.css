@@ -14,3 +14,48 @@
 .article-list .read .article-title {
 }
 
+
+.header-cal-source {
+	position:relative;
+	float:right;
+	margin: 8px -16px 0px 0px;
+	font-size: 14px;
+	text-transform: uppercase;
+	font-weight: bold;
+	height:35px;
+	line-height: 33px;
+	border-width: 0px 22px 0px 16px;
+	-webkit-border-image: url(../images/cal-selector-header-gray.png) 0 22 0 16 stretch stretch;
+	-webkit-box-sizing: border-box;	
+}
+.header-cal-source-hit-target { 
+	position:absolute;
+	top:-10px;
+	left:-35px;
+	right:-25px;
+	height:52px;
+}
+.header-cal-selector {
+	margin-left:-5px;
+	padding-right: 2px;
+	background: transparent;
+	display:inline-block;
+	min-width: 12px;
+	max-width: 80px;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.header-down-arrow {
+	background: transparent;
+	float:right;
+	display:inline-block;
+	background: url(../images/header-arrow-down.png) right center no-repeat;
+	height:36px;
+	margin-right:-5px;
+	width:10px;
+}
+.header-cal-source:active	{-webkit-border-image: url(../images/cal-selector-headerpress-gray.png) 0 22 0 16 stretch stretch;}
+
+
+

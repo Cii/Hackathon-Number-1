@@ -27,21 +27,11 @@ MainAssistant.prototype.setup = function()
 			}
 		}, this.articleModel = {});
 		
-		this.controller.setupWidget(Mojo.Menu.commandMenu, {}, {
-		        visible: false,
-		        items: [
-					{},
-					{ 
-						toggleCmd: "show-unread",
-						items: [
-							{ label: $L("Unread"), command: "show-unread" },
-			         		{ label: $L("Read"), command: "show-read" }
-						]},
-					{}
-		        ]
-		    }
-		);
-		
+		// Filter
+		this.filterViewsHandler = this.filterViews.bind(this);
+		this.controller.listen(this.controller.get("filterView"), Mojo.Event.tap, this.filterViewsHandler);
+		this.chosen = 'all';
+				
 		// dummy data:
 		var dummy = [{
 				title: "Article #1, unread",
@@ -92,6 +82,32 @@ MainAssistant.prototype.activate = function (event) {
 MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
 };
+
+MainAssistant.prototype.filterViews = function(event) {
+	var filterItems = [
+		{label: $L("All"), command: 'all'},
+		{label: $L("Unread"), command: 'unread'},
+		{label: $L("Read"), command: 'read'}
+	];
+	for(var i = 0; i < filterItems.length; i++){
+		if(filterItems[i].command == this.chosen){
+			filterItems[i].chosen = true;
+			break;
+		}
+	}
+	this.controller.popupSubmenu({
+		onChoose: function(value){
+			if(value != undefined)
+				this.controller.get("currentFilterView").innerHTML = value;
+				this.chosen = value;
+			if(value == 'all'){
+				//todo
+			}
+		},
+		placeNear: this.controller.get("currentFilterView"),
+		items: filterItems
+	});
+}
 
 MainAssistant.prototype.handleCommand = function(event) {
     if (event.type === Mojo.Event.command) {
