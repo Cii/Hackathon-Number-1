@@ -35,6 +35,8 @@ MainAssistant.prototype.setup = function()
 		this.listTap = this.listTap.bindAsEventListener(this);
 		this.controller.listen("article-list", Mojo.Event.listTap, this.listTap);
 		
+		this.cachePageHandler = this.cachePage.bindAsEventListener(this);
+		
 		this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, 
 			{	visible: true, 
 				items: [
@@ -78,6 +80,11 @@ MainAssistant.prototype.activate = function (event) {
 
 MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
+	$A(this.controller.select('.cacheButton')).each(function(item, index) {
+		if (item.stopListening) {
+			Mojo.Event.stopListening(item, Mojo.Event.tap, this.cachePageHandler);
+		}
+	}, this);
 };
 
 MainAssistant.prototype.filterViews = function(event) {
@@ -155,11 +162,21 @@ MainAssistant.prototype.showItems = function(state) {
 	//this.controller.modelChanged(this.articleModel, this);
 	// adding some model properties for buttons
 	this.articleModel.items.each(function(item, index) {
-		item.disabled = false;
-		item.label = 'Cache Page Contents';
+		if (!item.label) {
+			item.disabled = false;
+			item.label = 'Cache Page Contents';
+		}
 	}, this);
 	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
+	debugString('INSTANTIATING CHILD WIDGETS');
 	this.controller.instantiateChildWidgets(document);
+	debugString('LISTENING ON CHILD WIDGETS?');
+	//Mojo.Event.listen(this.controller.get('cacheButton'), Mojo.Event.tap, this.cachePage.bindAsEventListener(this));
+	$A(this.controller.select('.cacheButton')).each(function(item, index) {
+		if (!item.stopListening) {
+			Mojo.Event.listen(item, Mojo.Event.tap, this.cachePageHandler);
+		}
+	}, this);
 };
 
 MainAssistant.prototype.filterArticles = function(filterString, listWidget, offset, count)
@@ -278,7 +295,8 @@ var AddBookmarkAssistant = Class.create({
     		this.widget.mojo.close();
     		
     		var length = this.controller.get("article-list").mojo.getLength();
-    		this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url}]);
+    		//this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url}]);
+			this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, label: 'Cache Page Contents', disabled: false}]);
     		
     	} else {
     		this.showAlert("Something bad happened! Code: " + response_code);
@@ -300,8 +318,12 @@ var AddBookmarkAssistant = Class.create({
 });
 
 MainAssistant.prototype.cachePage = function(event) {
-	var url = event.item.url;
+	debugString('ATTEMPTING TO CACHE PAGE');
+	debugObject(event.currentTarget);
+	//var url = event.item.url;
 	// get the url  from event and
 	// Ajax the page contents
 	// on success, store the info in the db
+	
+	event.stop();
 };
