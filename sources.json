@@ -21,5 +21,13 @@
     {
         "scenes": "auth",
         "source": "app/assistants/auth-assistant.js"
+    },
+    {
+        "scenes": "help",
+        "source": "app/assistants/help-assistant.js"
+    },
+    {
+        "scenes": "helpdetails",
+        "source": "app/assistants/helpdetails-assistant.js"
     }
 ]
