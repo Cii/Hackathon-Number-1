@@ -15,7 +15,8 @@ Relego.Database					 		= dbInstance({'name': Relego.db.info.name, 'version': Rel
 Relego.prefs = {
     email: "",
     password: "",
-    allowRotate: false
+    allowRotate: false,
+	theme: "dark"
 };
 
 function AppAssistant(appController){

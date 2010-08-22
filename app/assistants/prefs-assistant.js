@@ -12,6 +12,20 @@ PrefsAssistant.prototype.setup = function() {
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	
 	/* setup widgets here */
+	
+	this.controller.setupWidget('themeSelectorId', {
+			labelPlacement: Mojo.Widget.labelPlacementLeft,
+			label: $L("Theme")
+		},
+		this.themeSelectorModel = {
+			value: Relego.prefs.theme,
+			choices: [
+				{label: $L("Dark"), value: "dark"},
+				{label: $L("Light"), value: "light"}
+			]
+		}
+	);
+	
 	this.toggleAttributes = {
 		trueLabel: $L('Yes'),
 		falseLabel: $L('No')
@@ -40,6 +54,7 @@ PrefsAssistant.prototype.deactivate = function(event) {
 
 	// Store preferences in global prefs object
 	Relego.prefs.allowRotate = this.allowRotateModel.value;
+	Relego.prefs.theme = this.themeSelectorModel.value;
 	
 	// Save global prefs object to cookie.
 	Relego.prefsCookie = new Mojo.Model.Cookie(Mojo.appInfo.title + ".prefs");
