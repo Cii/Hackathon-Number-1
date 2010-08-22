@@ -1,15 +1,13 @@
 function MainAssistant() {}
 
 MainAssistant.prototype.allItems = [];
-MainAssistant.prototype.currentState = 0;
+MainAssistant.prototype.currentState = (Relego.prefs.open == 'unread')?0:1;
 
 
 MainAssistant.prototype.setup = function()
 {
 
 		this.controller.get('main_title').update($L("Articles"));
-
-		this.controller.window.setTimeout(this.loadDbScreen.bind(this),1500);
 		
 		this.controller.setupWidget(Mojo.Menu.appMenu, {omitDefaultItems: true}, {
 			items: [Mojo.Menu.prefsItem, Mojo.Menu.helpItem]
@@ -17,11 +15,11 @@ MainAssistant.prototype.setup = function()
 		
 		this.controller.setupWidget("article-list", {
 			itemTemplate: "main/relegoRowTemplate",
-			reorderable: true,
+			reorderable: false,
 			filterFunction: this.filterArticles.bind(this),
 			formatters: {
 //				toggleText: function(v, m) { if(m.state === 1){ m.toggleText = "Unread"; else m.toggleText = "Read";} }
-				unread: function(v, m) { if (m.state === 0) {
+				unread: function(v, m) { if (m.readStatus === 0) {
 					m.unread = "unread";
 				}}
 			}
@@ -30,26 +28,21 @@ MainAssistant.prototype.setup = function()
 		// Filter
 		this.filterViewsHandler = this.filterViews.bind(this);
 		this.controller.listen(this.controller.get("filterView"), Mojo.Event.tap, this.filterViewsHandler);
-		this.chosen = 'all';
-				
-		// dummy data:
-		var dummy = [{
-				title: "Article #1, unread",
-				state: 0,	// state: 0 == unread, 1 == read
-				icon: "http://www.smashingmagazine.com/favicon.ico",
-				url: "http://url"
-			}, {
-				title: "Test #2, alread read blah blah blah",
-				state: 1,
-				icon: "http://www.smashingmagazine.com/favicon.ico",
-				url: "http://www.smashingmagazine.com/2010/08/16/the-world-of-signage-photo-contest-join-in-and-win-an-slr-camera/"
-			}];
-		this.setArticles(dummy);
+		this.chosen = Relego.prefs.open; //'unread'; //preference;
+		this.currentState = (Relego.prefs.open == 'all')?undefined:this.currentState;
+		this.controller.get("currentFilterView").update($L(this.chosen));
 		
 		this.listTap = this.listTap.bindAsEventListener(this);
 		this.controller.listen("article-list", Mojo.Event.listTap, this.listTap);
 		
-		this.controller.setMenuVisible(Mojo.Menu.commandMenu, false);
+		this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, 
+			{	visible: true, 
+				items: [
+					{icon: 'new', command: 'addBookmark', disabled: false},
+					{icon: 'refresh', command: 'refreshBookmarks', disabled: false}
+				]
+			}
+		);
 		
 		this.controller.setupWidget(Mojo.Menu.appMenu, {
 				omitDefaultItems: true
@@ -64,6 +57,10 @@ MainAssistant.prototype.setup = function()
 			}
 		);
 		
+		API.getAllBookmarks(this.setArticles.bind(this), function(err) {
+			// TODO: Replace console.log with proper error handling
+			console.log("error: "+Object.toJSON(err));
+		});
 	};
 	
 MainAssistant.prototype.activate = function (event) {
@@ -98,10 +95,21 @@ MainAssistant.prototype.filterViews = function(event) {
 	this.controller.popupSubmenu({
 		onChoose: function(value){
 			if(value != undefined)
+			{
+				// TODO: This is wrong!  For translation we must use the label
 				this.controller.get("currentFilterView").innerHTML = value;
 				this.chosen = value;
-			if(value == 'all'){
-				//todo
+			}
+			switch(value){
+				case 'unread':
+					this.showItems(0);
+					break;
+				case 'read':
+					this.showItems(1);
+					break;
+				case 'all':
+					this.showItems();
+					break;
 			}
 		},
 		placeNear: this.controller.get("currentFilterView"),
@@ -112,26 +120,40 @@ MainAssistant.prototype.filterViews = function(event) {
 MainAssistant.prototype.handleCommand = function(event) {
     if (event.type === Mojo.Event.command) {
         switch (event.command) {
-            case "show-unread":
-				this.showItems(0);
+            case "addBookmark":
+				var dialogModel={
+					template: 'main/add-bookmark-dialog',
+					assistant: new AddBookmarkAssistant(this, this.showItems.bind(this)),
+					preventCancel: false
+				};
+				this.controller.showDialog(dialogModel);
 			break;
-			case "show-read":
-				this.showItems(1);
+			
+			case "refreshBookmarks":
+				API.getAllBookmarks(this.setArticles.bind(this), function(err) {
+					console.log("error: "+ Object.toJSON(err));
+				});
 			break;
+			
+			
         }
     }
 };
 	
 MainAssistant.prototype.setArticles = function(articles) {
+	console.log("new articles: "+ Object.toJSON(articles));
 	this.allItems = articles;
 	this.showItems(this.currentState);
 };
 	
 MainAssistant.prototype.showItems = function(state) {
-	this.currentState = state;
-	var filtered = this.allItems.findAll(function(i) { return i.state == state; });
+	if(state)
+		this.currentState = state;
+		
+	var filtered = state == undefined ? this.allItems : this.allItems.findAll(function(i) { return i.readStatus == state; });
 	this.articleModel.items = filtered;
-	this.controller.modelChanged(this.articleModel, this);
+	//this.controller.modelChanged(this.articleModel, this);
+	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
 };
 
 MainAssistant.prototype.filterArticles = function(filterString, listWidget, offset, count)
@@ -155,30 +177,33 @@ MainAssistant.prototype.filterArticles = function(filterString, listWidget, offs
 
 MainAssistant.prototype.listTap = function(event)
 {
-	var url = event.item.url;
+	var launchParams = {
+        id: "com.palm.app.browser",
+        params: {'target': event.item.url}
+    };
+ 
+    this.controller.serviceRequest('palm://com.palm.applicationManager',
+    {
+        method: 'open',
+        parameters: launchParams
+    });
+
+	API.markBookmarkRead(event.item, onSuccess.bind(this), function(){});
+	function onSuccess(){
+		API.getAllBookmarks(this.setArticles.bind(this), function(err) {
+			console.log("error: "+err);
+		});
+	}
 	// launch read scene
 }; 
 
-var screenOpacity = 1;
-MainAssistant.prototype.loadDbScreen = function()
-{	
-	var dbScreenElement = this.controller.get("loadingScreen");
-	screenOpacity = screenOpacity - 0.02;
-	dbScreenElement.style.opacity = screenOpacity;			
-	
-	if(screenOpacity < 0.2)
-	{
-		dbScreenElement.hide();
-		this.controller.setMenuVisible(Mojo.Menu.commandMenu, true);
-	}
-	else
-	{
-		this.controller.window.setTimeout(this.loadDbScreen.bind(this), 10);
-	}
-};		
+MainAssistant.prototype.addBookmark = function(url) {
+	API.addBookmark(url);
+};
 
 var AddBookmarkAssistant = Class.create({
-	initialize: function(ass) {
+	initialize: function(ass, callBackFunc) {
+		this.callBackFunc = callBackFunc;
 		this.assistant = ass;
 		this.controller = ass.controller;
 	},
@@ -186,11 +211,13 @@ var AddBookmarkAssistant = Class.create({
 	setup: function(widget) {
 		this.widget = widget;
 		
-		this.controller.setupWidget("urlField", {hintText: "URL"}, this.urlModel = { value: ""});
+		this.controller.setupWidget("titleField", {hintText: "Title"}, this.titleModel = { value: ""});
+		this.controller.setupWidget("urlField", {hintText: "URL", hintText: 'enter url...', modelProperty: "originalValue"}, this.urlModel = { value: "", originalValue: "http://"});
+		
 		this.controller.setupWidget("addButton", {label: "Add Bookmark", type: Mojo.Widget.activityButton}, {buttonClass: "affirmative"});
 		this.controller.setupWidget("cancelButton", {label: "Cancel"}, {});
 		
-		this.controller.listen("addButton", Mojo.Event.tap, this.ladd = this.add.bindAsEventListener(this));
+		this.controller.listen("addButton", Mojo.Event.tap, this.ladd = this.verifyData.bindAsEventListener(this)); //this.add.bindAsEventListener(this));
 		this.controller.listen("cancelButton", Mojo.Event.tap, this.lcancel = this.cancel.bindAsEventListener(this));
 	},
 	
@@ -199,9 +226,66 @@ var AddBookmarkAssistant = Class.create({
 		this.controller.stopListening("cancelButton", Mojo.Event.tap, this.lcancel);		
 	},
 	
-	add: function() {
-		this.assistant.addBookmark(this.urlModel.value);
-		this.widget.mojo.close();
+	verifyData: function() {
+		
+		var title = this.controller.get('titleField').mojo.getValue();
+		var url = this.controller.get('urlField').mojo.getValue();
+		
+		// Is this a valid URL
+		var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
+		var valid_url = regexp.test(url);
+		
+		title = title.replace(/^\s+|\s+$/g, '');
+		url = url.replace(/^\s+|\s+$/g, '');
+		
+		if (valid_url) {
+			
+			var bookmark_data = "{\"0\":{\"url\":\""+ url +"\",\"title\":\""+ title +"\",\"tags\":\"\"}}";
+			
+			var username = API.library.opts.username;
+			
+			var base_url = "https://readitlaterlist.com/v2/send";
+    	
+	    	var page_data = "{\"0\":{\"url\":\""+ url +"\",\"title\":\""+ title +"\",\"tags\":\"\"}}";
+			
+			var ril_url = base_url + "?username=" + API.library.opts.username + "&password=" + API.library.opts.password + "&apikey=" + API.library.opts.apikey + "&new=" + page_data;
+	    	
+	    	var myAjax = new Ajax.Request(ril_url, {
+				method: 'get',
+				onSuccess: this.addComplete.bind(this, true, url, title),
+				onFailure: this.addComplete.bind(this, false, url, title)
+			});
+			
+		} else {
+			this.controller.get('response').innerText = "Invalid!";
+			this.controller.get('addButton').mojo.deactivate();
+		}
+		
+	},
+	
+	addComplete: function(success, url, title, response) {
+		
+    	var response_code = response.request.transport.status;
+    	
+    	if ( (success) && (response_code == "200") ) {
+    		
+    		this.widget.mojo.close();
+    		
+    		var length = this.controller.get("article-list").mojo.getLength();
+    		this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url}]);
+    		
+    	} else {
+    		this.showAlert("Something bad happened! Code: " + response_code);
+    	}
+    	
+    },
+    
+    showAlert: function(response) {
+		this.controller.showAlertDialog({
+          	onChoose: function(value) {},
+            title: "Alert",
+            message: response,
+            choices:[ {label:'OK', value:'OK', type:'color'} ]});
 	},
 	
 	cancel: function() {

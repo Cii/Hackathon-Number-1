@@ -21,7 +21,7 @@ var API = {
   /**
    * API key for ReadItLater service.
    */
-  SERVICE_READ_IT_LATER_API_KEY : "xxxxx",
+  SERVICE_READ_IT_LATER_API_KEY : "17eg3B50pyjr6Sb409Te3d8k04AHH63b",
 
 
   /**
@@ -76,7 +76,7 @@ var API = {
    * @param inSuccess Callback function for a successful call.
    * @param inFailure Callback function for a failed call.
    */
-  verifyAccount : function(inUser,inSuccess,inFailure) {
+  verifyAccount : function(inUser, inSuccess, inFailure) {
 
     this.user = inUser;
 
@@ -106,6 +106,8 @@ var API = {
    * @param inFailure Callback function for a failed call.
    */
   createAccount : function(inUser, inSuccess, inFailure) {
+	
+	this.user = inUser;
 
     this.library.signup({
       username : this.user.username,
@@ -130,12 +132,26 @@ var API = {
    */
   getAllBookmarks : function(inSuccess, inFailure) {
 
-        var opts={
-		onSuccess: inSuccess,
-		onFailure: inFailure
-	};
-
-	this.library.get(opts);
+    this.library.get({
+      onSuccess : function(inResponse) {
+       var bookmarks = [ ];
+	   var list = inResponse.list;
+       for(var id in list) {
+		  var b = list[id];
+          var bookmark = {}
+          bookmark.itemID = b.item_id;
+          bookmark.title = b.title;
+          bookmark.url = b.url;
+          bookmark.timeAdded = b.time_added;
+          bookmark.readStatus = b.state;
+          bookmark.tags = b.tags;
+		  console.log(b.title);
+          bookmarks.push(new Bookmark(bookmark));
+        }
+        inSuccess(bookmarks);
+      },
+      onFailure : inFailure
+    });
 
   }, // End getAllBookmarks().
 
@@ -150,13 +166,13 @@ var API = {
    */
   addBookmark : function(inBookmark, inSuccess, inFailure) {
 
-	var opts={
-		'new': inBookmark.toJSON(),
-		onSuccess: inSuccess,
-		onFailure: inFailure
-	};
+    var opts = {
+      "new" : inBookmark.toJSON(),
+      onSuccess : inSuccess,
+      onFailure : inFailure
+    };
 
-	this.library.send(opts);
+    this.library.send(opts);
 
   }, // End addBookmark().
 
@@ -171,9 +187,13 @@ var API = {
    * @param inFailure  Callback function for a failed call.
    */
   markBookmarkRead : function(inBookmark, inSuccess, inFailure) {
-
-    // Use library.send()
-
+  	var opts = {
+		"read": inBookmark.toJSON(),
+		onSuccess: inSuccess,
+		onFailure: inFailure
+	};
+	
+	this.library.send(opts);
   } // End markBookmarkRead().
 
 
@@ -210,7 +230,7 @@ var User = function(inData) {
 
   // Constructor code.
   this.username = inData.username;
-  this.password = inData.Password;
+  this.password = inData.password;
   this.bookmarks = inData.bookmarks;
 
 
@@ -219,8 +239,8 @@ var User = function(inData) {
    */
   this.toString = function() {
 
-    return "User = { username=" + username + ", password=" + password +
-      "bookmarks=[ " + bookmarks.join(",") + " ] }";
+    return "User = { username=" + this.username + ", password=" + ", " +
+      this.password + "bookmarks=[ " + this.bookmarks.join(",") + " ] }";
 
   }; // End toString().
 
@@ -287,6 +307,11 @@ var Bookmark = function(inData) {
    * Overridden toString() method for friendlier debugging.
    */
   this.toString = function() {
+
+    return "Bookmark = { itemID=" + this.itemID + ", title=" +
+      this.title + ", " + "timeAdded=" + this.timeAdded + ", readStatus=" +
+      this.readStatus + ", " + "tags=" + this.tags + " ]";
+
   }; // End toString().
 
 
@@ -298,6 +323,11 @@ var Bookmark = function(inData) {
    *               and password.
    */
   this.toJSON = function(inFull) {
+
+    return "{ itemID:\"" + this.itemID + "\", title:\"" + this.title + "\", " +
+      "timeAdded=\"" + this.timeAdded + "\", readStatus=\"" +
+      this.readStatus + "\", " + "tags=\"" + this.tags + "\" }";
+
   }; // End toJSON().
 
 

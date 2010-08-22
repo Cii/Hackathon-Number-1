@@ -9,15 +9,9 @@
 
   <div class="palm-text-wrapper">
     <div class="palm-body-text">
-      This is a quick description of Relego
-    </div>
-
-    <div class="palm-body-text">
-      Login or Create a new account
+      Read It Later allows you to save pages to read later.
     </div>
   </div>
-
-  <div class="palm-header-spacer"></div>
 
   <div class="palm-group">
     <div class="palm-group-title">Username</div>
@@ -48,7 +42,19 @@
     </div>
   </div>
 
-  <div id="authBtn" x-mojo-element="Button"></div>
+  <div class="palm-group">
+    <div class="palm-group-title" x-mojo-loc="">New Account</div>
+    <div class="palm-list">
+      <div class="palm-row single">
+        <div class="palm-row-wrapper">
+          <div x-mojo-element="CheckBox" id="new" name="new" class="left"></div>
+          <div class="title">Create New Account</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="authBtn" x-mojo-element="Button" class="affirmative"></div>
 
   <div class="palm-scrim" id="spinnerScrim">
     <div x-mojo-element="Spinner" id="mojoSpinner" name="mojoSpinner"></div>

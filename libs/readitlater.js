@@ -193,7 +193,47 @@ ReadItLater.prototype.stats = function(opts) {};
  * Verify a user's account 
  * @TODO
  */
-ReadItLater.prototype.authenticate = function(opts) {};
+ReadItLater.prototype.authenticate = function(opts) {
+ var that = this, method_url = this._getMethodUrl("authenticate");
+
+  opts = this._defaults({
+    'method':'authenticate',
+    'http_method':'post',
+    'onSuccess':null,
+    'onFailure':null,
+    'parseResponse':true
+  }, opts);
+
+  opts.params = "username=#{username}&password=#{password}&apikey=#{apikey}".interpolate({
+    username: opts.username,
+    password: opts.password,
+    apikey: API.apiKey
+  });
+
+  new Ajax.Request(method_url, {
+    'method'   : opts.http_method,
+    'parameters' : opts.params,
+    'onSuccess'  : function (transport) {
+      if (opts.onSuccess) {
+        opts.onSuccess(transport);
+      }
+    },
+    'onFailure'  : function(transport) {
+      var status_code   = transport.status;
+      var error_message = that.status_codes[status_code] || 'Unknown Error';
+      var error_desc = transport.transport.getResponseHeader('X-Error') || null;
+
+      if (opts.onFailure) {
+        opts.onFailure({
+          code: status_code,
+          message: error_message,
+          description: error_desc
+        });
+      }
+    }
+  });
+
+};
 
 /**
  * Register a new user 
@@ -246,7 +286,7 @@ ReadItLater.prototype._callMethod = function(opts) {
 			}
 
 			if (opts.onSuccess) {
-				opts.onSuccess.call(that, resp_data, transport);
+				opts.onSuccess(resp_data);
 			}
 		},
 		'onFailure'	 : function(transport) {
@@ -294,4 +334,47 @@ ReadItLater.prototype._defaults = function(defaults, args) {
 	if (!defaults) { defaults = {}; }
 	var new_args = Object.extend(defaults, args);
 	return new_args;
+};
+
+ReadItLater.prototype.signup = function(opts) {
+
+ var that = this, method_url = this._getMethodUrl("signup");
+
+  opts = this._defaults({
+    'method':'signup',
+    'http_method':'get',
+    'onSuccess':null,
+    'onFailure':null,
+    'parseResponse':true
+  }, opts);
+
+  opts.params = "username=#{username}&password=#{password}&apikey=#{apikey}".interpolate({
+    username: opts.username,
+    password: opts.password,
+    apikey: API.apiKey
+  });
+
+  new Ajax.Request(method_url, {
+    'method'   : opts.http_method,
+    'parameters' : opts.params,
+    'onSuccess'  : function (transport) {
+      if (opts.onSuccess) {
+        opts.onSuccess(null);
+      }
+    },
+    'onFailure'  : function(transport) {
+      var status_code   = transport.status;
+      var error_message = that.status_codes[status_code] || 'Unknown Error';
+      var error_desc = transport.transport.getResponseHeader('X-Error') || null;
+
+      if (opts.onFailure) {
+        opts.onFailure({
+          code: status_code,
+          message: error_message,
+          description: error_desc
+        });
+      }
+    }
+  });
+
 };

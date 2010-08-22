@@ -1,10 +1,21 @@
 /* Style it here */
+/* main-scene */
+#mojo-scene-main-scene-scroller, #mojo-scene-prefs-scene-scroller, #mojo-scene-auth-scene-scroller,
+#mojo-scene-help-scene-scroller, #mojo-scene-helpdetails-scene-scroller, #mojo-scene-textonly-scene-scroller {
+  background: url(../images/relegoBG.png) left center no-repeat;
+}
 
+.filter-field-container-height {
+ height: 96px;
+}
 
 /* article-list scene */
-.article-list .palm-row .subtitle {
+.article-list .title {
+	padding: 10px 5px 0 5px !important;
+}
+.article-list .subtitle {
 	color: gray;
-	padding: 0 5px 0 5px !important;
+	padding: 0 5px 10px 5px !important;
 }
 
 .article-list .unread .article-title {
@@ -14,6 +25,15 @@
 .article-list .read .article-title {
 }
 
+.palm-scene {
+  /*background: url(../images/relegoBG.png) left center no-repeat;*/
+  height: 100%;
+  width: 100%;
+}
+
+.palm-dark {
+  background: url(../images/relegoDarkBG.png) left center no-repeat;
+}
 
 .header-cal-source {
 	position:relative;

@@ -13,10 +13,12 @@ Relego.Stage						= null;
 Relego.Database					 		= dbInstance({'name': Relego.db.info.name, 'version': Relego.db.info.version});	//--> Our database; use Relego.Database.get_connection()
 
 Relego.prefs = {
-    email: "",
+    username: "",
     password: "",
+	email: "", //Shouldn't be needed, kept to ensure I don't break stuff.
     allowRotate: false,
-	theme: "dark"
+	theme: "dark",
+	open: "unread"
 };
 
 function AppAssistant(appController){
@@ -25,6 +27,8 @@ AppAssistant.prototype.setup = function(){
 	//this.handleLaunch();
 	Relego.Metrix = new Metrix();
 	this.getPrefs();
+	// set service type
+	API.setService(API.SERVICE_READ_IT_LATER);
 	// if this is the first time the app has ever run, make the database
 	if (true) {
 		this.createDbSchema();
@@ -38,7 +42,7 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 	var cardStageController = this.controller.getStageController(Relego.MainStageName);
 	var appController = Mojo.Controller.getAppController();
 	Relego.Stage = cardStageController;
-	var sceneToPush = (Relego.prefs.email === "") ? "auth" : "main";
+	var sceneToPush = "splash";
 	
 	try{
 		if (!launchParams)  {
@@ -57,7 +61,7 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 						stageController.pushScene(sceneToPush);
 					};
 					
-					var stageArguments = {name: Relego.MainStageName, lightweight: false};
+					var stageArguments = {name: Relego.MainStageName, lightweight: true};
 					this.controller.createStageWithCallback(stageArguments, pushMainScene.bind(this), "card");
 				}
 		}else{
