@@ -66,7 +66,7 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 				}
 		}else{
 			
-			Mojo.Log.error("*** --> handleLaunch Called w/ Params: " + launchParams.action);
+			Mojo.Log.info("*** --> handleLaunch Called w/ Params: " + launchParams.action);
 
 			var prefs = Relego.prefs;
 			if (prefs.username) {
@@ -80,26 +80,22 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 
 				case "addtorelego":
 					//--> This should auto save the passed along option
-					try{
-						var bookmark_data = "{\"0\":{\"url\":\""+ launchParams.url +"\",\"title\":\""+ launchParams.title +"\",\"tags\":\"\"}}";
-						
-						var username = API.library.opts.username;
-						
-						var base_url = "https://readitlaterlist.com/v2/send";
+					var bookmark_data = "{\"0\":{\"url\":\""+ launchParams.url +"\",\"title\":\""+ launchParams.title +"\",\"tags\":\"\"}}";
 					
-						var page_data = "{\"0\":{\"url\":\""+ launchParams.url +"\",\"title\":\""+ launchParams.title +"\",\"tags\":\"\"}}";
-						
-						var ril_url = base_url + "?username=" + API.library.opts.username + "&password=" + API.library.opts.password + "&apikey=" + API.library.opts.apikey + "&new=" + page_data;
-						Mojo.Log.info(ril_url);
-						
-						var myAjax = new Ajax.Request(ril_url, {
-							method: 'get',
-							onSuccess: this.addComplete.bind(this, true, launchParams.url, launchParams.title),
-							onFailure: this.addComplete.bind(this, false, launchParams.url, launchParams.title)
-						});
-					}catch(e){
-						Mojo.Log.error("*** --> Auto Add Error: " + e);
-					}
+					var username = API.library.opts.username;
+					
+					var base_url = "https://readitlaterlist.com/v2/send";
+				
+					var page_data = "{\"0\":{\"url\":\""+ launchParams.url +"\",\"title\":\""+ launchParams.title +"\",\"tags\":\"\"}}";
+					
+					var ril_url = base_url + "?username=" + API.library.opts.username + "&password=" + API.library.opts.password + "&apikey=" + API.library.opts.apikey + "&new=" + page_data;
+					//Mojo.Log.info(ril_url);
+					
+					var myAjax = new Ajax.Request(ril_url, {
+						method: 'get',
+						onSuccess: this.addComplete.bind(this, true, launchParams.url, launchParams.title),
+						onFailure: this.addComplete.bind(this, false, launchParams.url, launchParams.title)
+					});
 					break;
 			}
 		}
@@ -113,15 +109,8 @@ AppAssistant.prototype.addComplete = function(success, url, title, response) {
 	var response_code = response.request.transport.status;
 	var cardStageController = this.controller.getStageController(Relego.MainStageName);
 
-	Mojo.Log.info("*** --> Auto cardStageController: " + cardStageController);
-
 	if ( (success) && (response_code == "200") ) {
 		Mojo.Controller.getAppController().showBanner($L("URL Saved to Relego"), {source: 'notification'});
-		
-		//--> Activate the stage if it exists
-		if (cardStageController){
-			cardStageController.activate();
-		}
 	} else {
 		//--> Oooo, an Error!
 		Mojo.Controller.getAppController().showBanner($L("Error: URL not Saved to Relego"), {source: 'notification'});
@@ -129,16 +118,13 @@ AppAssistant.prototype.addComplete = function(success, url, title, response) {
 
 	//--> Activate the stage if it exists
 	if (cardStageController){
-		Mojo.Log.info("*** --> We have a stage!");
+		//--> App already open, so refresh the main scene
 		cardStageController.popScenesTo("splash");
 		cardStageController.pushScene("main");
-
+		cardStageController.activate();
 	}else{
-		Mojo.Log.info("*** --> We DO NOT have a stage! So why must we create one?!?");
-
-		var pushNothing = function(stageController) {
-			//stageController.pushScene(sceneToPush);
-		};
+		//--> App NOT open, so create a stage thenc lose it
+		var pushNothing = function(stageController) {};
 		this.controller.createStageWithCallback({name: Relego.MainStageName, lightweight: true}, pushNothing.bind(this), "card");
 		Mojo.Controller.getAppController().closeAllStages();
 	}
