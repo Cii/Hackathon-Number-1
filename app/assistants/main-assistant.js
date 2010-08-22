@@ -153,7 +153,13 @@ MainAssistant.prototype.showItems = function(state) {
 	var filtered = state == undefined ? this.allItems : this.allItems.findAll(function(i) { return i.readStatus == state; });
 	this.articleModel.items = filtered;
 	//this.controller.modelChanged(this.articleModel, this);
+	// adding some model properties for buttons
+	this.articleModel.items.each(function(item, index) {
+		item.disabled = false;
+		item.label = 'Cache Page Contents';
+	}, this);
 	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
+	this.controller.instantiateChildWidgets(document);
 };
 
 MainAssistant.prototype.filterArticles = function(filterString, listWidget, offset, count)
@@ -292,3 +298,10 @@ var AddBookmarkAssistant = Class.create({
 		this.widget.mojo.close();
 	}
 });
+
+MainAssistant.prototype.cachePage = function(event) {
+	var url = event.item.url;
+	// get the url  from event and
+	// Ajax the page contents
+	// on success, store the info in the db
+};
