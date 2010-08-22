@@ -45,6 +45,17 @@ body.palm-default.palm-dark {
 .article-list .read .article-title {
 }
 
+.cacheButton {
+	background: url(../images/details-button.png) top center no-repeat;
+	height: 52px;
+	width: 35px;
+	float: right;
+}
+
+.cacheButton.selected{
+	background: url(../images/details-button-press.png) top center no-repeat;
+}
+
 .header-cal-source {
 	position:relative;
 	float:right;

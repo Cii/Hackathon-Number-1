@@ -35,7 +35,18 @@ MainAssistant.prototype.setup = function()
 		this.listTap = this.listTap.bindAsEventListener(this);
 		this.controller.listen("article-list", Mojo.Event.listTap, this.listTap);
 		
-		this.cachePageHandler = this.cachePage.bindAsEventListener(this);
+		this.detailsActionList = {
+			'attributes': {
+			},
+			'model': {
+				'choices': [
+					{'label': 'Cache page', 'value': 'cache'}
+				],
+				'disabled': false
+			}
+		}
+		this.detailsPopupHandler = this.detailsPopup.bindAsEventListener(this);
+		//this.controller.setupWidget(this.detailsActionList.id, this.detailsActionList.attributes, this.detailsActionList.model);
 		
 		this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, 
 			{	visible: true, 
@@ -98,7 +109,7 @@ MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
 	$A(this.controller.select('.cacheButton')).each(function(item, index) {
 		if (item.stopListening) {
-			Mojo.Event.stopListening(item, Mojo.Event.tap, this.cachePageHandler);
+			Mojo.Event.stopListening(item, Mojo.Event.tap, this.detailsPopupHandler);
 		}
 	}, this);
 };
@@ -178,16 +189,17 @@ MainAssistant.prototype.showItems = function(state) {
 	//this.controller.modelChanged(this.articleModel, this);
 	// adding some model properties for buttons
 	this.articleModel.items.each(function(item, index) {
-		if (!item.label) {
+		if (!item.choices) {
+			item.choices = this.detailsActionList.model.choices;
+			item.labelPlacement = null;
 			item.disabled = false;
-			item.label = 'Cache Page Contents';
 		}
 	}, this);
 	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
 	this.controller.instantiateChildWidgets(document);
 	$A(this.controller.select('.cacheButton')).each(function(item, index) {
 		if (!item.stopListening) {
-			Mojo.Event.listen(item, Mojo.Event.tap, this.cachePageHandler);
+			Mojo.Event.listen(item, Mojo.Event.tap, this.detailsPopupHandler);
 		}
 	}, this);
 };
@@ -309,7 +321,7 @@ var AddBookmarkAssistant = Class.create({
     		
     		var length = this.controller.get("article-list").mojo.getLength();
     		//this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url}]);
-			this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, label: 'Cache Page Contents', disabled: false}]);
+			this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, choices: this.detailsActionList.model.choices, disabled: false}]);
     		
     	} else {
     		this.showAlert("Something bad happened! Code: " + response_code);
@@ -329,6 +341,14 @@ var AddBookmarkAssistant = Class.create({
 		this.widget.mojo.close();
 	}
 });
+
+MainAssistant.prototype.detailsPopup = function(event) {
+	// the intent is to have a popup list display when the details button is tapped
+	debugString('DO DETAILS POPUP');
+	// for now just caching the page
+	this.cachePage(event);
+	event.stop();
+};
 
 MainAssistant.prototype.cachePage = function(event) {
 	var request, selectSql;
@@ -369,5 +389,5 @@ MainAssistant.prototype.cachePage = function(event) {
 		}.bind(this)
 	});
 	
-	event.stop();
+	//event.stop();
 };
