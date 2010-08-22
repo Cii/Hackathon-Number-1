@@ -67,11 +67,27 @@ MainAssistant.prototype.activate = function (event) {
 	//Mojo.Log.info("Rotate:", Relego.prefs.allowRotate);
 	if (Relego.prefs.allowRotate) {
 		this.controller.stageController.setWindowOrientation("free");
-		//Mojo.Log.info("Rotate FREE!");
 	}
 	else {
 		this.controller.stageController.setWindowOrientation("up");
-		//Mojo.Log.info("Rotate UP!");
+	}
+	
+	// Change theme based on prefs (required in each scene!
+/*
+	var bodyDiv = this.controller.get('mojo-scene-main');
+	if (Relego.prefs.theme === 'light') {
+		bodyDiv.removeClassName('palm-dark');
+	}else
+	{
+		bodyDiv.addClassName('palm-dark');
+	}
+
+*/	var bodyDiv = this.controller.document.getElementsByTagName('body')[0];
+	if (Relego.prefs.theme === 'light') {
+		bodyDiv.removeClassName('palm-dark');
+	}else
+	{
+		bodyDiv.addClassName('palm-dark');
 	}
 	
 };
