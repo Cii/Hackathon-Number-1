@@ -119,6 +119,21 @@ Relego.db = {
 			return sql;
 		};
 		
+		that.get_deleteSql = function(limiters){ // limiter is array of WHERE clauses in JSON format
+			sql = "DELETE FROM '" + definition.name + "'";
+			if (!limiters) {
+				limiters = [];
+			}
+			if (limiters.length > 0) {
+				sql += " WHERE "
+				for (i = 0; i < limiters.length; i += 1) {
+					sql += limiters[i].column + limiters[i].operand + "'" + limiters[i].value + "'" + (limiters[i].connector ? " " + limiters[i].connector + " " : "");
+				}
+			}
+			return sql;
+		};
+		
+		
 		return that;
 	},
 	'dbInstance': function(definition){

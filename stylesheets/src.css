@@ -45,6 +45,25 @@ body.palm-default.palm-dark {
 .article-list .read .article-title {
 }
 
+.actionButton .list-selector-triangle {
+	background: none !important;
+}
+
+.actionButton .list-selector-value {
+	display: none;
+}
+
+.actionButton {
+	background: url(../images/details-button.png) top center no-repeat;
+	height: 52px;
+	width: 35px;
+	float: right;
+}
+
+.actionButton.selected{
+	background: url(../images/details-button-press.png) top center no-repeat;
+}
+
 .header-cal-source {
 	position:relative;
 	float:right;
@@ -87,5 +106,19 @@ body.palm-default.palm-dark {
 }
 .header-cal-source:active	{-webkit-border-image: url(../images/cal-selector-headerpress-gray.png) 0 22 0 16 stretch stretch;}
 
+.easterEggImage {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	opacity: 0;
+	-webkit-transition-property: opacity z-index;
+	-webkit-transition-duration: 2s;
+	z-index: -1;
+}
+
+.easterEggImage.show {
+	opacity: 1;
+	z-index: 100;
+}
 
 

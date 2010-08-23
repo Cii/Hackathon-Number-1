@@ -35,7 +35,18 @@ MainAssistant.prototype.setup = function()
 		this.listTap = this.listTap.bindAsEventListener(this);
 		this.controller.listen("article-list", Mojo.Event.listTap, this.listTap);
 		
-		this.cachePageHandler = this.cachePage.bindAsEventListener(this);
+		this.detailsActionList = {
+			'attributes': {
+				'choices': [
+					{'label': 'Cache page', 'value': 'cache'},
+					{'label': 'Delete cache', 'value': 'uncache'}
+				]
+			},
+			'model': {
+				'disabled': false
+			}
+		};
+		this.detailsPopupHandler = this.detailsPopup.bindAsEventListener(this);
 		
 		this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, 
 			{	visible: true, 
@@ -83,22 +94,21 @@ MainAssistant.prototype.activate = function (event) {
 	{
 		bodyDiv.addClassName('palm-dark');
 	}
-
-*/	var bodyDiv = this.controller.document.getElementsByTagName('body')[0];
+*/
+	var bodyDiv = this.controller.document.getElementsByTagName('body')[0];
 	if (Relego.prefs.theme === 'light') {
 		bodyDiv.removeClassName('palm-dark');
 	}else
 	{
 		bodyDiv.addClassName('palm-dark');
 	}
-	
 };
 
 MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
-	$A(this.controller.select('.cacheButton')).each(function(item, index) {
-		if (item.stopListening) {
-			Mojo.Event.stopListening(item, Mojo.Event.tap, this.cachePageHandler);
+	$A(this.controller.select('.actionButton')).each(function(item, index) {
+		if (item.removeEventListener) {
+			Mojo.Event.stopListening(item, Mojo.Event.propertyChange, this.detailsPopupHandler);
 		}
 	}, this);
 };
@@ -178,16 +188,17 @@ MainAssistant.prototype.showItems = function(state) {
 	//this.controller.modelChanged(this.articleModel, this);
 	// adding some model properties for buttons
 	this.articleModel.items.each(function(item, index) {
-		if (!item.label) {
+		if (!item.choices) {
+			item.choices = this.detailsActionList.attributes.choices;
 			item.disabled = false;
-			item.label = 'Cache Page Contents';
 		}
 	}, this);
+	
 	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
 	this.controller.instantiateChildWidgets(document);
-	$A(this.controller.select('.cacheButton')).each(function(item, index) {
+	$A(this.controller.select('.actionButton')).each(function(item, index) {
 		if (!item.stopListening) {
-			Mojo.Event.listen(item, Mojo.Event.tap, this.cachePageHandler);
+			Mojo.Event.listen(item, Mojo.Event.propertyChange, this.detailsPopupHandler);
 		}
 	}, this);
 };
@@ -309,7 +320,7 @@ var AddBookmarkAssistant = Class.create({
     		
     		var length = this.controller.get("article-list").mojo.getLength();
     		//this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url}]);
-			this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, label: 'Cache Page Contents', disabled: false}]);
+			this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, choices: this.detailsActionList.attributes.choices, disabled: false}]);
     		
     	} else {
     		this.showAlert("Something bad happened! Code: " + response_code);
@@ -329,6 +340,21 @@ var AddBookmarkAssistant = Class.create({
 		this.widget.mojo.close();
 	}
 });
+
+MainAssistant.prototype.detailsPopup = function(event) {
+	// the intent is to have a popup list display when the details button is tapped
+	switch (event.value) {
+		case 'cache':
+			this.cachePage(event);
+			break;
+		case 'uncache':
+			this.deleteCache(event);
+			break;
+		default:
+			break;
+	}
+	event.stop();
+};
 
 MainAssistant.prototype.cachePage = function(event) {
 	var request, selectSql;
@@ -368,6 +394,29 @@ MainAssistant.prototype.cachePage = function(event) {
 			debugError('cache fatality', 'COULD NOT REACH URL');
 		}.bind(this)
 	});
-	
-	event.stop();
+};
+
+MainAssistant.prototype.deleteCache = function(event) {
+	var db = Relego.Database;
+	var table = db.get_schema().pages.table;
+	var item, limiters, sql;
+	if (!event) { // delete everything in the pages table
+		
+	} else { // get the item details and delete id = itemID from pages table
+		item = this.controller.get('article-list').mojo.getItemByNode(event.currentTarget);
+		limiters = [
+			{'column': 'id', 'operand': '=', 'value': item.itemID}
+		];
+		sql = table.get_deleteSql(limiters);
+		db.get_connection().transaction(function(transaction) {
+			transaction.executeSql(sql, [],
+														function(transaction, results) {
+															// set some sort of cached property for visual indicator/code decision?
+														}.bind(this),
+														function(transaction, error) {
+															debugError('cache fatality', 'CANNOT DELETE FROM TABLE: ' + error.message);
+														}.bind(this)
+			);
+		});
+	}
 };
