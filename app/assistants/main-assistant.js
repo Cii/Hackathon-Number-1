@@ -8,6 +8,13 @@ MainAssistant.prototype.setup = function()
 {
 
 		this.controller.get('main_title').update($L("Articles"));
+		var bodyDiv = this.controller.document.getElementsByTagName('body')[0];
+		if (Relego.prefs.theme === 'light') {
+			bodyDiv.removeClassName('palm-dark');
+		}else
+		{
+			bodyDiv.addClassName('palm-dark');
+		}
 		
 		this.controller.setupWidget(Mojo.Menu.appMenu, {omitDefaultItems: true}, {
 			items: [Mojo.Menu.prefsItem, Mojo.Menu.helpItem]
@@ -87,14 +94,6 @@ MainAssistant.prototype.activate = function (event) {
 	
 	// Change theme based on prefs (required in each scene!
 /*
-	var bodyDiv = this.controller.get('mojo-scene-main');
-	if (Relego.prefs.theme === 'light') {
-		bodyDiv.removeClassName('palm-dark');
-	}else
-	{
-		bodyDiv.addClassName('palm-dark');
-	}
-*/
 	var bodyDiv = this.controller.document.getElementsByTagName('body')[0];
 	if (Relego.prefs.theme === 'light') {
 		bodyDiv.removeClassName('palm-dark');
@@ -102,7 +101,8 @@ MainAssistant.prototype.activate = function (event) {
 	{
 		bodyDiv.addClassName('palm-dark');
 	}
-};
+
+*/};
 
 MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
