@@ -6,7 +6,6 @@ MainAssistant.prototype.currentState = (Relego.prefs.open == 'unread')?0:1;
 
 MainAssistant.prototype.setup = function()
 {
-
 		this.controller.get('main_title').update($L("Articles"));
 		
 		this.controller.setupWidget(Mojo.Menu.appMenu, {omitDefaultItems: true}, {
@@ -30,6 +29,7 @@ MainAssistant.prototype.setup = function()
 		this.controller.listen(this.controller.get("filterView"), Mojo.Event.tap, this.filterViewsHandler);
 		this.chosen = Relego.prefs.open; //'unread'; //preference;
 		this.currentState = (Relego.prefs.open == 'all')?undefined:this.currentState;
+Mojo.Log.info("current="+this.chosen);
 		this.controller.get("currentFilterView").update($L(this.chosen));
 		
 		this.listTap = this.listTap.bindAsEventListener(this);
@@ -43,8 +43,8 @@ MainAssistant.prototype.setup = function()
 		this.detailsActionList = {
 			'attributes': {
 				'choices': [
-					{'label': 'Cache page', 'value': 'cache'},
-					{'label': 'Delete cache', 'value': 'uncache'}
+					{'label': $L('Cache page'), 'value': 'cache'},
+					{'label': $L('Delete cache'), 'value': 'uncache'}
 				]
 			},
 			'model': {
@@ -134,8 +134,7 @@ MainAssistant.prototype.filterViews = function(event) {
 		onChoose: function(value){
 			if(value != undefined)
 			{
-				// TODO: This is wrong!  For translation we must use the label
-				this.controller.get("currentFilterView").innerHTML = value;
+				this.controller.get("currentFilterView").innerHTML = $L(value);
 				this.chosen = value;
 			}
 			switch(value){
@@ -348,14 +347,17 @@ var AddBookmarkAssistant = Class.create({
 	setup: function(widget) {
 		this.widget = widget;
 		
-		this.controller.setupWidget("titleField", {hintText: "Title"}, this.titleModel = { value: ""});
+		this.controller.setupWidget("titleField", {hintText: $L("Title")}, this.titleModel = { value: ""});
 		this.controller.setupWidget("urlField", {hintText: "URL", hintText: 'enter url...', modelProperty: "originalValue"}, this.urlModel = { value: "", originalValue: "http://"});
 		
-		this.controller.setupWidget("addButton", {label: "Add Bookmark", type: Mojo.Widget.activityButton}, {buttonClass: "affirmative"});
-		this.controller.setupWidget("cancelButton", {label: "Cancel"}, {});
+		this.controller.setupWidget("addButton", {label: $L("Add Bookmark"), type: Mojo.Widget.activityButton}, {buttonClass: "affirmative"});
+		this.controller.setupWidget("cancelButton", {label: $L("Cancel")}, {});
 		
 		this.controller.listen("addButton", Mojo.Event.tap, this.ladd = this.verifyData.bindAsEventListener(this)); //this.add.bindAsEventListener(this));
 		this.controller.listen("cancelButton", Mojo.Event.tap, this.lcancel = this.cancel.bindAsEventListener(this));
+
+		this.controller.get('add_dialog_title').innerHTML=$L("Add Bookmark");
+
 	},
 	
 	cleanup: function() {
@@ -423,7 +425,7 @@ var AddBookmarkAssistant = Class.create({
           	onChoose: function(value) {},
             title: "Alert",
             message: response,
-            choices:[ {label:'OK', value:'OK', type:'color'} ]});
+            choices:[ {label:$L('OK'), value:'OK', type:'color'} ]});
 	},
 	
 	cancel: function() {
