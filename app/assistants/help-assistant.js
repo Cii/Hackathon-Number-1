@@ -4,6 +4,7 @@ HelpAssistant.prototype.setup = function(){
 	//this.controller.setupWidget(Mojo.Menu.appMenu, FreeRingtones.MenuAttr, FreeRingtones.MenuModel);
 	
 	this.controller.listen("helpWhatIs", Mojo.Event.tap, this.helpOption.bindAsEventListener(this, "helpWhatIs"));
+	this.controller.listen("helpDesktop", Mojo.Event.tap, this.helpOption.bindAsEventListener(this, "helpDesktop"));
 	this.controller.listen("helpPatch", Mojo.Event.tap, this.helpOption.bindAsEventListener(this, "helpPatch"));
 	this.controller.listen("helpFAQ", Mojo.Event.tap, this.helpOption.bindAsEventListener(this, "helpFAQ"));
 
@@ -24,6 +25,8 @@ HelpAssistant.prototype.deactivate = function(event) {
 HelpAssistant.prototype.cleanup = function(event) {
 
 	this.controller.stopListening("helpWhatIs", Mojo.Event.tap, this.helpOption.bindAsEventListener(this, "helpWhatIs"));
+	this.controller.stopListening("helpDesktop", Mojo.Event.tap, this.helpOption.bindAsEventListener(this, "helpDesktop"));
+	this.controller.stopListening("helpPatch", Mojo.Event.tap, this.helpOption.bindAsEventListener(this, "helpPatch"));
 	this.controller.stopListening("helpFAQ", Mojo.Event.tap, this.helpOption.bindAsEventListener(this, "helpFAQ"));
 
 	this.controller.stopListening("HelpContact", Mojo.Event.tap, this.btnHelpContact.bindAsEventListener(this));
