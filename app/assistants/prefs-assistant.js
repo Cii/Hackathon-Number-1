@@ -6,7 +6,7 @@ function PrefsAssistant() {
 
 	// for the secret thing
 	this.easterEggString = '';
-	this.easterEggSecret = 'WOR';
+	this.easterEggSecret = 'WOR Hackathon';
 }
 
 PrefsAssistant.prototype.setup = function() {
@@ -73,9 +73,16 @@ PrefsAssistant.prototype.setup = function() {
 	/* add event handlers to listen to events from widgets */
 	
 	// for the secret thing
-	// this.controller.get('easterEggImage').style.display = 'none';
+	this.imageViewer = this.controller.get('easterEggImage');
+	this.controller.setupWidget('easterEggImage',
+	    this.attributes = {
+	      noExtractFS: true
+	    },
+		{}
+	  );
 	this.keyPressHandler = this.keyPress.bindAsEventListener(this);
 	Mojo.Event.listen(this.controller.sceneElement, Mojo.Event.keypress, this.keyPressHandler);
+
 	this.editAccountHandler = this.editAccount.bind(this);
 	this.controller.listen('EditAccountButtonId', Mojo.Event.tap, this.editAccountHandler);
 
@@ -110,6 +117,10 @@ PrefsAssistant.prototype.activate = function(event) {
 	   example, key handlers that are observing the document */
 
 	this.changeTheme();
+	
+	// for the secret thing
+	this.imageViewer.mojo.manualSize(Mojo.Environment.DeviceInfo.screenWidth, Mojo.Environment.DeviceInfo.screenHeight - 50);
+	
 };
 
 PrefsAssistant.prototype.deactivate = function(event) {
@@ -146,15 +157,15 @@ PrefsAssistant.prototype.keyPress = function(event) {
 	if (currentChar == 8) {
 		this.easterEggString = '';
 		this.controller.get('easterEggImage').removeClassName('show');
-		// this.controller.get('easterEggImage').style.display = 'none';
 	}
 
 	if (this.easterEggString.length == this.easterEggSecret.length) {
 		if (this.easterEggString === this.easterEggSecret) {
 			Mojo.Log.info("Hooray! Easter Egg!");
-			// this.controller.get('easterEggImage').style.display = '';
+			this.imageViewer.mojo.centerUrlProvided('images/hackathon1.png');
+
 			this.controller.get('easterEggImage').addClassName('show');
-			this.easterEggString = '';
+			// this.easterEggString = '';
 		}
 	} else if (this.easterEggString.length > this.easterEggSecret.length) {
 		this.easterEggString = '';
