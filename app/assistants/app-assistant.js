@@ -88,9 +88,9 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 				
 					var page_data = "{\"0\":{\"url\":\""+ launchParams.url +"\",\"title\":\""+ launchParams.title +"\",\"tags\":\"\"}}";
 					
-					var ril_url = base_url + "?username=" + API.library.opts.username + "&password=" + API.library.opts.password + "&apikey=" + API.library.opts.apikey + "&new=" + page_data;
-					//Mojo.Log.info(ril_url);
-					
+					 var ril_url = base_url + "?username=" + API.library.opts.username + "&password=" + API.library.opts.password + "&apikey=" + API.library.opts.apikey + "&new=" + page_data;
+
+					// TODO: Fix this so we call the API
 					var myAjax = new Ajax.Request(ril_url, {
 						method: 'get',
 						onSuccess: this.addComplete.bind(this, true, launchParams.url, launchParams.title),
