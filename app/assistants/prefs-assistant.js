@@ -90,7 +90,7 @@ PrefsAssistant.prototype.changeTheme = function (event) {
 	if (event) {
 		Relego.prefs.theme = this.themeSelectorModel.value;
 	}
-	var bodyDiv = this.controller.document.getElementsByTagName('body')[0];
+	var bodyDiv = this.controller.get('mojo-scene-prefs');
 	if (Relego.prefs.theme === 'light') {
 		bodyDiv.removeClassName('palm-dark');
 	}else

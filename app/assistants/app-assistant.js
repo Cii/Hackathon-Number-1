@@ -50,12 +50,12 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 			// FIRST LAUNCH
 			//---------------------------------------------------------
 				if (cardStageController) {
-					Mojo.Log.error("*** --> cardStageController = TRUE. Launch Main");
+					Mojo.Log.info("*** --> cardStageController = TRUE. Launch Main");
 					// If it exists, just bring it to the front by focusing its window.
 					cardStageController.popScenesTo(sceneToPush);
 					cardStageController.activate();
 				}else{
-					Mojo.Log.error("*** --> cardStageController = FALSE. Launch Main");
+					Mojo.Log.info("*** --> cardStageController = FALSE. Launch Main");
 					// Create a callback function to set up the new main stage once it is done loading. It is passed the new stage controller as the first parameter.
 					var pushMainScene = function(stageController) {
 						stageController.pushScene(sceneToPush);
@@ -65,14 +65,37 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 					this.controller.createStageWithCallback(stageArguments, pushMainScene.bind(this), "card");
 				}
 		}else{
-			Mojo.Log.error("*** --> handleLaunch Called w/ Params: " + launchParams.action);
+			
+			Mojo.Log.info("*** --> handleLaunch Called w/ Params: " + launchParams.action);
+
+			var prefs = Relego.prefs;
+			if (prefs.username) {
+				API.verifyAccount(prefs, null, null);
+			}else{
+				//--> Well, this is a sub launch. So can we really push the auth scene?
+				break;
+			}
+
 			switch (launchParams.action){
-				
+
 				case "addtorelego":
 					//--> This should auto save the passed along option
-					//--> What params do we need?
+					var bookmark_data = "{\"0\":{\"url\":\""+ launchParams.url +"\",\"title\":\""+ launchParams.title +"\",\"tags\":\"\"}}";
 					
-					Mojo.Log.error("*** --> Added to Relogo");
+					var username = API.library.opts.username;
+					
+					var base_url = "https://readitlaterlist.com/v2/send";
+				
+					var page_data = "{\"0\":{\"url\":\""+ launchParams.url +"\",\"title\":\""+ launchParams.title +"\",\"tags\":\"\"}}";
+					
+					var ril_url = base_url + "?username=" + API.library.opts.username + "&password=" + API.library.opts.password + "&apikey=" + API.library.opts.apikey + "&new=" + page_data;
+					//Mojo.Log.info(ril_url);
+					
+					var myAjax = new Ajax.Request(ril_url, {
+						method: 'get',
+						onSuccess: this.addComplete.bind(this, true, launchParams.url, launchParams.title),
+						onFailure: this.addComplete.bind(this, false, launchParams.url, launchParams.title)
+					});
 					break;
 			}
 		}
@@ -80,6 +103,32 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 		Mojo.Log.error("handleLaunch Error: " + e);
 	}
 };
+
+AppAssistant.prototype.addComplete = function(success, url, title, response) {
+	Mojo.Log.info("*** --> Auto addComplete Called: " + response.request.transport.status);
+	var response_code = response.request.transport.status;
+	var cardStageController = this.controller.getStageController(Relego.MainStageName);
+
+	if ( (success) && (response_code == "200") ) {
+		Mojo.Controller.getAppController().showBanner($L("URL Saved to Relego"), {source: 'notification'});
+	} else {
+		//--> Oooo, an Error!
+		Mojo.Controller.getAppController().showBanner($L("Error: URL not Saved to Relego"), {source: 'notification'});
+	}
+
+	//--> Activate the stage if it exists
+	if (cardStageController){
+		//--> App already open, so refresh the main scene
+		cardStageController.popScenesTo("splash");
+		cardStageController.pushScene("main");
+		cardStageController.activate();
+	}else{
+		//--> App NOT open, so create a stage thenc lose it
+		var pushNothing = function(stageController) {};
+		this.controller.createStageWithCallback({name: Relego.MainStageName, lightweight: true}, pushNothing.bind(this), "card");
+		Mojo.Controller.getAppController().closeAllStages();
+	}
+}
 
 // -----------------------------------------
 // handleCommand - called to handle app menu selections
@@ -131,6 +180,10 @@ AppAssistant.prototype.createDbSchema = function() {
 				'name': 'id',
 				'type': 'INTEGER',
 				'constraints': ['PRIMARY KEY']
+			}),
+			dbColumn({
+				'name': 'lastUpdate',
+				'type': 'INTEGER'
 			}),
 			dbColumn({
 				'name': 'url',
