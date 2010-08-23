@@ -35,9 +35,6 @@ Mojo.Log.info("current="+this.chosen);
 		this.listTap = this.listTap.bindAsEventListener(this);
 		this.controller.listen("article-list", Mojo.Event.listTap, this.listTap);
 		
-		this.listHoldTap = this.listHoldTap.bindAsEventListener(this);
-		this.controller.listen("article-list", Mojo.Event.hold, this.listHoldTap);
-		
 		this.cachePageHandler = this.cachePage.bindAsEventListener(this);
 
 		this.detailsActionList = {
@@ -248,90 +245,6 @@ MainAssistant.prototype.listTap = function(event)
 	}
 	// launch read scene
 }; 
-
-MainAssistant.prototype.listHoldTap = function(event) {
-
-	// item.itemID, item.url, item.title, item.tags
-	var item = this.controller.get('article-list').mojo.getItemByNode(event.target);
-
-	var popupItems = [
-		{label: $L("Open"), command: 'open'},
-		{label: $L("Share on Facebook"), command: 'fbShare'}
-	];
-
-	if (item.readStatus == 0) {
-		popupItems.push({label: $L("Mark as Read"), command: 'markRead'});
-	} else if (item.readStatus == 1) {
-		popupItems.push({label: $L("Mark as Unread"), command: 'markUnead'});
-	}
-
-	var near = event.target;
-	this.controller.popupSubmenu({
-		onChoose: function(value){
-			switch(value){
-				case 'open':
-					// @TODO
-					this.openUrl(item.url);
-					break;
-				case 'markRead':
-					// @TODO
-					// this.markAsRead(item);
-				case 'markRead':
-					// @TODO
-					// this.markAsUnread(item);
-				case 'fbShare':
-					// @TODO
-					this.shareOnFacebook(item);
-					break;
-			}
-		},
-		placeNear: near,
-		items: popupItems
-	});
-
-	Event.stop(event);
-};
-
-MainAssistant.prototype.shareOnFacebook = function(item){
-	try{
-		var facebookText = "Checkout this Page " + item.title + " on " + item.url + " with Releto on my Palm " + Mojo.Environment.DeviceInfo.modelName;
-		
-		this.controller.serviceRequest("palm://com.palm.applicationManager", {
-			method: 'launch',
-			parameters: {
-				id: 'com.palm.app.facebook',
-				params: {status: facebookText}
-			},
-			onFailure:function(){
-				this.controller.showAlertDialog({
-					onChoose: function(value){
-						if (value=="open"){
-							this.openUrl("http://developer.palm.com/appredirect/?packageid=com.palm.app.facebook");
-						}
-				}.bind(this),
-				preventCancel: false,
-				title: $L("Facebook App Not Found"),
-				message: $L("Please install the Facebook App to share items. You can download this app from the App Catalog."),
-					choices:[
-						{label:$L('No not yet'), value:"cancel", type:'dismissal'},
-						{label:$L('Open App Catalog'), value:"open", type:'affirmative'}
-					]
-				});
-			}.bind(this)
-		})
-	}catch(e){
-		
-	}
-};
-
-MainAssistant.prototype.openUrl = function(url){
-	this.controller.serviceRequest('palm://com.palm.applicationManager', {
-		method:'open',
-		parameters:{
-			target: url
-		}
-	});
-}
 
 MainAssistant.prototype.addBookmark = function(url) {
 	API.addBookmark(url);
