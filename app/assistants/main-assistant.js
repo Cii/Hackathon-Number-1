@@ -39,6 +39,19 @@ MainAssistant.prototype.setup = function()
 		this.controller.listen("article-list", Mojo.Event.hold, this.listHoldTap);
 		
 		this.cachePageHandler = this.cachePage.bindAsEventListener(this);
+
+		this.detailsActionList = {
+			'attributes': {
+				'choices': [
+					{'label': 'Cache page', 'value': 'cache'},
+					{'label': 'Delete cache', 'value': 'uncache'}
+				]
+			},
+			'model': {
+				'disabled': false
+			}
+		};
+		this.detailsPopupHandler = this.detailsPopup.bindAsEventListener(this);
 		
 		this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, 
 			{	visible: true, 
@@ -86,22 +99,21 @@ MainAssistant.prototype.activate = function (event) {
 	{
 		bodyDiv.addClassName('palm-dark');
 	}
-
-*/	var bodyDiv = this.controller.document.getElementsByTagName('body')[0];
+*/
+	var bodyDiv = this.controller.document.getElementsByTagName('body')[0];
 	if (Relego.prefs.theme === 'light') {
 		bodyDiv.removeClassName('palm-dark');
 	}else
 	{
 		bodyDiv.addClassName('palm-dark');
 	}
-	
 };
 
 MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
-	$A(this.controller.select('.cacheButton')).each(function(item, index) {
-		if (item.stopListening) {
-			Mojo.Event.stopListening(item, Mojo.Event.tap, this.cachePageHandler);
+	$A(this.controller.select('.actionButton')).each(function(item, index) {
+		if (item.removeEventListener) {
+			Mojo.Event.stopListening(item, Mojo.Event.propertyChange, this.detailsPopupHandler);
 		}
 	}, this);
 };
@@ -181,19 +193,17 @@ MainAssistant.prototype.showItems = function(state) {
 	//this.controller.modelChanged(this.articleModel, this);
 	// adding some model properties for buttons
 	this.articleModel.items.each(function(item, index) {
-		if (!item.label) {
+		if (!item.choices) {
+			item.choices = this.detailsActionList.attributes.choices;
 			item.disabled = false;
-			item.label = 'Cache Page Contents';
 		}
 	}, this);
+	
 	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
-	debugString('INSTANTIATING CHILD WIDGETS');
 	this.controller.instantiateChildWidgets(document);
-	debugString('LISTENING ON CHILD WIDGETS?');
-	//Mojo.Event.listen(this.controller.get('cacheButton'), Mojo.Event.tap, this.cachePage.bindAsEventListener(this));
-	$A(this.controller.select('.cacheButton')).each(function(item, index) {
+	$A(this.controller.select('.actionButton')).each(function(item, index) {
 		if (!item.stopListening) {
-			Mojo.Event.listen(item, Mojo.Event.tap, this.cachePageHandler);
+			Mojo.Event.listen(item, Mojo.Event.propertyChange, this.detailsPopupHandler);
 		}
 	}, this);
 };
@@ -400,7 +410,7 @@ var AddBookmarkAssistant = Class.create({
     		
     		var length = this.controller.get("article-list").mojo.getLength();
     		//this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url}]);
-			this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, label: 'Cache Page Contents', disabled: false}]);
+			this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, choices: this.detailsActionList.attributes.choices, disabled: false}]);
     		
     	} else {
     		this.showAlert("Something bad happened! Code: " + response_code);
@@ -421,13 +431,82 @@ var AddBookmarkAssistant = Class.create({
 	}
 });
 
-MainAssistant.prototype.cachePage = function(event) {
-	debugString('ATTEMPTING TO CACHE PAGE');
-	debugObject(event.currentTarget);
-	//var url = event.item.url;
-	// get the url  from event and
-	// Ajax the page contents
-	// on success, store the info in the db
-	
+MainAssistant.prototype.detailsPopup = function(event) {
+	// the intent is to have a popup list display when the details button is tapped
+	switch (event.value) {
+		case 'cache':
+			this.cachePage(event);
+			break;
+		case 'uncache':
+			this.deleteCache(event);
+			break;
+		default:
+			break;
+	}
 	event.stop();
+};
+
+MainAssistant.prototype.cachePage = function(event) {
+	var request, selectSql;
+	var item = this.controller.get('article-list').mojo.getItemByNode(event.currentTarget);
+	var db = Relego.Database;
+	var table = db.get_schema().pages.table;
+	var record = {
+		'id': item.itemID,
+		'url': item.url,
+		'title': item.title,
+		'lastUpdate': Math.round(new Date().getTime() / 1000.0),
+		'tags': item.tags,
+		'favorite': 0,
+		'read': 0
+	};
+	request = new Ajax.Request(item.url, {
+		'method': 'get',
+		'evalJSON': false,
+		'onSuccess': function(response) {
+			// update the records pageText
+			record.pageText = response.responseText;
+			// store to db
+			selectSql = table.get_insertSql(record);
+			db.get_connection().transaction(function(transaction) {
+				transaction.executeSql(typeof(selectSql) === 'string' ? selectSql : selectSql[0], typeof(selectSql) === 'string' ? [] : selectSql[1],
+															function(transaction, results) {
+																// set some sort of cached property for visual indicator/code decision?
+															}.bind(this),
+															function(transaction, error) {
+																debugError('cache fatality', 'CANNOT INSERT RECORD: ' + error.message);
+															}.bind(this)
+				);
+			});
+		}.bind(this),
+		'onFailure': function(response) {
+			// LAME
+			debugError('cache fatality', 'COULD NOT REACH URL');
+		}.bind(this)
+	});
+};
+
+MainAssistant.prototype.deleteCache = function(event) {
+	var db = Relego.Database;
+	var table = db.get_schema().pages.table;
+	var item, limiters, sql;
+	if (!event) { // delete everything in the pages table
+		
+	} else { // get the item details and delete id = itemID from pages table
+		item = this.controller.get('article-list').mojo.getItemByNode(event.currentTarget);
+		limiters = [
+			{'column': 'id', 'operand': '=', 'value': item.itemID}
+		];
+		sql = table.get_deleteSql(limiters);
+		db.get_connection().transaction(function(transaction) {
+			transaction.executeSql(sql, [],
+														function(transaction, results) {
+															// set some sort of cached property for visual indicator/code decision?
+														}.bind(this),
+														function(transaction, error) {
+															debugError('cache fatality', 'CANNOT DELETE FROM TABLE: ' + error.message);
+														}.bind(this)
+			);
+		});
+	}
 };
