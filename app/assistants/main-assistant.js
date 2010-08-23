@@ -42,6 +42,8 @@ Mojo.Log.info("current="+this.chosen);
 		this.listTap = this.listTap.bindAsEventListener(this);
 		this.controller.listen("article-list", Mojo.Event.listTap, this.listTap);
 		
+		this.cachePageHandler = this.cachePage.bindAsEventListener(this);
+
 		this.detailsActionList = {
 			'attributes': {
 				'choices': [
@@ -145,7 +147,8 @@ MainAssistant.prototype.handleCommand = function(event) {
             case "addBookmark":
 				var dialogModel={
 					template: 'main/add-bookmark-dialog',
-					assistant: new AddBookmarkAssistant(this, this.showItems.bind(this)),
+					// assistant: new AddBookmarkAssistant(this, this.showItems.bind(this)),
+					assistant: new AddBookmarkAssistant(this, this.getArticles.bind(this)),
 					preventCancel: false
 				};
 				this.controller.showDialog(dialogModel);
@@ -237,6 +240,7 @@ MainAssistant.prototype.addBookmark = function(url) {
 	API.addBookmark(url);
 };
 
+
 var AddBookmarkAssistant = Class.create({
 	initialize: function(ass, callBackFunc) {
 		this.callBackFunc = callBackFunc;
@@ -279,20 +283,15 @@ var AddBookmarkAssistant = Class.create({
 		
 		if (valid_url) {
 			
-			var bookmark_data = "{\"0\":{\"url\":\""+ url +"\",\"title\":\""+ title +"\",\"tags\":\"\"}}";
-			
-			var username = API.library.opts.username;
-			
-			var base_url = "https://readitlaterlist.com/v2/send";
-    	
-	    	var page_data = "{\"0\":{\"url\":\""+ url +"\",\"title\":\""+ title +"\",\"tags\":\"\"}}";
-			
-			var ril_url = base_url + "?username=" + API.library.opts.username + "&password=" + API.library.opts.password + "&apikey=" + API.library.opts.apikey + "&new=" + page_data;
-	    	
-	    	var myAjax = new Ajax.Request(ril_url, {
-				method: 'get',
-				onSuccess: this.addComplete.bind(this, true, url, title),
-				onFailure: this.addComplete.bind(this, false, url, title)
+			var bmark = {};
+			bmark.title = title;
+			bmark.url = url;
+	  
+	  		var bookmark = new Bookmark(bmark);
+
+			API.addSingleBookmark(bookmark, this.addComplete.bind(this), function(err) {
+				debugError("Add Bookmark", Object.toJSON(err));
+				this.showAlert("Something bad happened! Code: " + response_code);
 			});
 			
 		} else {
@@ -301,25 +300,19 @@ var AddBookmarkAssistant = Class.create({
 		}
 		
 	},
-	
-	addComplete: function(success, url, title, response) {
+
+	addComplete: function() {
 		
-    	var response_code = response.request.transport.status;
-    	
-    	if ( (success) && (response_code == "200") ) {
-    		
-    		this.widget.mojo.close();
-    		
-    		var length = this.controller.get("article-list").mojo.getLength();
-    		//this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url}]);
-			this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, choices: this.detailsActionList.attributes.choices, disabled: false}]);
-    		
-    	} else {
-    		this.showAlert("Something bad happened! Code: " + response_code);
-    	}
-    	
-    },
-    
+		this.widget.mojo.close();
+		
+		// var length = this.controller.get("article-list").mojo.getLength();
+		API.getAllBookmarks(this.callBackFunc.bind(this), function(err) {
+			// TODO: Replace console.log with proper error handling
+			console.log("error: "+Object.toJSON(err));
+		});
+
+	},
+
     showAlert: function(response) {
 		this.controller.showAlertDialog({
           	onChoose: function(value) {},
@@ -411,4 +404,12 @@ MainAssistant.prototype.deleteCache = function(event) {
 			);
 		});
 	}
+};
+
+MainAssistant.prototype.getArticles = function() {
+	API.getAllBookmarks(this.setArticles.bind(this), function(err) {
+		// TODO: Replace console.log with proper error handling
+		console.log("error: "+Object.toJSON(err));
+	});
+
 };

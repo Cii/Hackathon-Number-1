@@ -176,6 +176,28 @@ var API = {
 
   }, // End addBookmark().
 
+  /**
+   * Adds a single bookmark on the remote service.  Pass null to inSuccess if call is
+   * successful or a string describing the failure if it doesn't work.
+   *
+   * @param inBookmark A Bookmark object.
+   * @param inSuccess  Callback function for a successful call.
+   * @param inFailure  Callback function for a failed call.
+   */
+  addSingleBookmark : function(inBookmark, inSuccess, inFailure) {
+
+    var opts = {
+      title: inBookmark.title,
+	  url: inBookmark.url,
+      onSuccess : inSuccess,
+      onFailure : inFailure
+    };
+
+    this.library.add(opts);
+
+  }, // End addBookmark().
+
+
 
   /**
    * Marks a specified bookmark as read.  Pass null to inSuccess if call is
