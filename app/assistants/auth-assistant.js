@@ -51,6 +51,14 @@ AuthAssistant.prototype = {
     // listener for the button and checkbox
     Mojo.Event.listen(this.controller.get('authBtn'), Mojo.Event.tap, this.authenticate.bind(this));
     Mojo.Event.listen(this.controller.get("new"), Mojo.Event.propertyChange, this.changeBtn.bind(this));
+
+    // translate the scene
+    this.controller.get('auth-title').innerHTML=$L('Relego for webOS');
+    this.controller.get('auth-descr').innerHTML=$L('Read It Later allows you to save pages to read later.');
+    this.controller.get('auth-user').innerHTML=$L('Username');
+    this.controller.get('auth-pass').innerHTML=$L('Password');
+    this.controller.get('auth-new').innerHTML=$L('New Account');
+    this.controller.get('auth-create').innerHTML=$L('Create New Account');
   },
 
   activate: function (event) {
@@ -67,7 +75,9 @@ AuthAssistant.prototype = {
   },
 
   changeBtn: function (event) {
-    this.button.label = event.value ? "Create Account" : "Log In";
+    var temp = event.value ? "Create Account" : "Log In";
+    temp = $L("temp");
+    this.button.label = temp;
     this.controller.modelChanged(this.button);
   },
 
