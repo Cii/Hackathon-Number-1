@@ -37,16 +37,16 @@ MainAssistant.prototype.setup = function()
 		
 		this.detailsActionList = {
 			'attributes': {
-				'choices': [
-					{'label': 'Cache page', 'value': 'cache'},
-					{'label': 'Delete cache', 'value': 'uncache'}
-				]
+				/*'choices': [
+					{'label': 'Cache page', 'command': 'cache'},
+					{'label': 'Delete cache', 'command': 'uncache'}
+				]*/
 			},
 			'model': {
 				'disabled': false
 			}
 		};
-		this.detailsPopupHandler = this.detailsPopup.bindAsEventListener(this);
+		
 		
 		this.controller.setupWidget(Mojo.Menu.commandMenu, {menuClass: 'no-fade'}, 
 			{	visible: true, 
@@ -106,11 +106,6 @@ MainAssistant.prototype.activate = function (event) {
 
 MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
-	$A(this.controller.select('.actionButton')).each(function(item, index) {
-		if (item.removeEventListener) {
-			Mojo.Event.stopListening(item, Mojo.Event.propertyChange, this.detailsPopupHandler);
-		}
-	}, this);
 };
 
 MainAssistant.prototype.filterViews = function(event) {
@@ -174,9 +169,13 @@ MainAssistant.prototype.handleCommand = function(event) {
 };
 	
 MainAssistant.prototype.setArticles = function(articles) {
+	var index;
 	console.log("new articles: "+ Object.toJSON(articles));
 	this.allItems = articles;
 	this.showItems(this.currentState);
+	for (index = 0; index < this.allItems.length; index += 1) {
+		this.getCachedProperty(this.allItems[index]);
+	}
 };
 	
 MainAssistant.prototype.showItems = function(state) {
@@ -186,21 +185,10 @@ MainAssistant.prototype.showItems = function(state) {
 	var filtered = state == undefined ? this.allItems : this.allItems.findAll(function(i) { return i.readStatus == state; });
 	this.articleModel.items = filtered;
 	//this.controller.modelChanged(this.articleModel, this);
-	// adding some model properties for buttons
-	this.articleModel.items.each(function(item, index) {
-		if (!item.choices) {
-			item.choices = this.detailsActionList.attributes.choices;
-			item.disabled = false;
-		}
-	}, this);
 	
 	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
 	this.controller.instantiateChildWidgets(document);
-	$A(this.controller.select('.actionButton')).each(function(item, index) {
-		if (!item.stopListening) {
-			Mojo.Event.listen(item, Mojo.Event.propertyChange, this.detailsPopupHandler);
-		}
-	}, this);
+	
 };
 
 MainAssistant.prototype.filterArticles = function(filterString, listWidget, offset, count)
@@ -222,8 +210,14 @@ MainAssistant.prototype.filterArticles = function(filterString, listWidget, offs
 	listWidget.mojo.setCount(totalResultsSize);
 }; 
 
-MainAssistant.prototype.listTap = function(event)
-{
+MainAssistant.prototype.listTap = function(event) {
+	if (event.originalEvent.target.hasClassName('actionButton')) {
+		// do details popup
+		this.detailsPopup(event.originalEvent);
+		// stop event
+		event.stop();
+		return;
+	}
 	var launchParams = {
         id: "com.palm.app.browser",
         params: {'target': event.item.url}
@@ -319,8 +313,8 @@ var AddBookmarkAssistant = Class.create({
     		this.widget.mojo.close();
     		
     		var length = this.controller.get("article-list").mojo.getLength();
-    		//this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url}]);
-			this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, choices: this.detailsActionList.attributes.choices, disabled: false}]);
+    		this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url}]);
+			//this.controller.get("article-list").mojo.noticeAddedItems(length, [{title: title, url: url, choices: this.detailsActionList.attributes.choices, disabled: false}]);
     		
     	} else {
     		this.showAlert("Something bad happened! Code: " + response_code);
@@ -342,23 +336,64 @@ var AddBookmarkAssistant = Class.create({
 });
 
 MainAssistant.prototype.detailsPopup = function(event) {
-	// the intent is to have a popup list display when the details button is tapped
-	switch (event.value) {
-		case 'cache':
-			this.cachePage(event);
-			break;
-		case 'uncache':
-			this.deleteCache(event);
-			break;
-		default:
-			break;
+	// item.itemID, item.url, item.title, item.tags
+	var item = this.controller.get('article-list').mojo.getItemByNode(event.target);
+
+	var popupItems = [
+		{label: $L("Open"), command: 'open'},
+		{label: $L("Share on Facebook"), command: 'fbShare'}
+	];
+
+	if (item.readStatus == 0) {
+		popupItems.push({label: $L("Mark as Read"), command: 'markRead'});
+	} else if (item.readStatus == 1) {
+		popupItems.push({label: $L("Mark as Unread"), command: 'markUnead'});
 	}
+	
+	if (!item.cached) {
+		popupItems.push({label: $L('Cache page'), command: 'cache'});
+	} else {
+		popupItems.push({label: $L('Delete page cache'), command: 'uncache'});
+	}
+
+	var near = event.target;
+	this.controller.popupSubmenu({
+		onChoose: function(value){
+			switch(value){
+				case 'open':
+					// @TODO
+					this.openUrl(item.url);
+					break;
+				case 'markRead':
+					// @TODO
+					// this.markAsRead(item);
+				case 'markUnread':
+					// @TODO
+					// this.markAsUnread(item);
+				case 'fbShare':
+					// @TODO
+					this.shareOnFacebook(item);
+					break;
+				case 'cache': 
+					this.cachePage(item);
+					break;
+				case 'uncache':
+					this.deleteCache(item);
+					break;
+				default:
+					break;
+			}
+		},
+		placeNear: near,
+		items: popupItems
+	});
+
 	event.stop();
 };
 
-MainAssistant.prototype.cachePage = function(event) {
+MainAssistant.prototype.cachePage = function(item) {
 	var request, selectSql;
-	var item = this.controller.get('article-list').mojo.getItemByNode(event.currentTarget);
+	//var item = this.controller.get('article-list').mojo.getItemByNode(event.currentTarget);
 	var db = Relego.Database;
 	var table = db.get_schema().pages.table;
 	var record = {
@@ -368,7 +403,7 @@ MainAssistant.prototype.cachePage = function(event) {
 		'lastUpdate': Math.round(new Date().getTime() / 1000.0),
 		'tags': item.tags,
 		'favorite': 0,
-		'read': 0
+		'read': item.readStatus
 	};
 	request = new Ajax.Request(item.url, {
 		'method': 'get',
@@ -382,12 +417,14 @@ MainAssistant.prototype.cachePage = function(event) {
 				transaction.executeSql(typeof(selectSql) === 'string' ? selectSql : selectSql[0], typeof(selectSql) === 'string' ? [] : selectSql[1],
 															function(transaction, results) {
 																// set some sort of cached property for visual indicator/code decision?
+																item.cached = 1;
+																this.showItems(this.currentState);
 															}.bind(this),
 															function(transaction, error) {
 																debugError('cache fatality', 'CANNOT INSERT RECORD: ' + error.message);
 															}.bind(this)
 				);
-			});
+			}.bind(this));
 		}.bind(this),
 		'onFailure': function(response) {
 			// LAME
@@ -396,14 +433,13 @@ MainAssistant.prototype.cachePage = function(event) {
 	});
 };
 
-MainAssistant.prototype.deleteCache = function(event) {
+MainAssistant.prototype.deleteCache = function(item) {
 	var db = Relego.Database;
 	var table = db.get_schema().pages.table;
-	var item, limiters, sql;
-	if (!event) { // delete everything in the pages table
-		
-	} else { // get the item details and delete id = itemID from pages table
-		item = this.controller.get('article-list').mojo.getItemByNode(event.currentTarget);
+	var limiters, sql;
+	if (!item) { // delete everything in the pages table
+		// not turned on yet
+	} else { // delete id = item.itemID from pages table
 		limiters = [
 			{'column': 'id', 'operand': '=', 'value': item.itemID}
 		];
@@ -412,11 +448,40 @@ MainAssistant.prototype.deleteCache = function(event) {
 			transaction.executeSql(sql, [],
 														function(transaction, results) {
 															// set some sort of cached property for visual indicator/code decision?
+															item.cached = 0;
+															this.showItems(this.currentState);
 														}.bind(this),
 														function(transaction, error) {
 															debugError('cache fatality', 'CANNOT DELETE FROM TABLE: ' + error.message);
 														}.bind(this)
 			);
-		});
+		}.bind(this));
+	}
+};
+
+MainAssistant.prototype.getCachedProperty = function(item) {
+	var db = Relego.Database;
+	var table = db.get_schema().pages.table;
+	var limiters, sql;
+	if (!item) {
+		// get all the list items and check them
+	} else {
+		limiters = [{'column': 'id', 'operand': '=', 'value': item.itemID}];
+		sql = table.get_selectSql(limiters);
+		db.get_connection().transaction(function(transaction) {
+			transaction.executeSql(sql, [],
+														function(transaction, results) {
+															if (results.rows.length === 1) {
+																item.cached = 1;
+															} else {
+																item.cached = 0;
+															}
+															//this.showItems(this.currentState);  // could be a lot of calls to showItems and may not be necessary
+														}.bind(this),
+														function(transaction, error) {
+															debugError('cache fatality', 'CANNOT READ FROM TABLE: ' + error.message);
+														}.bind(this)
+			);
+		}.bind(this))
 	}
 };
