@@ -45,14 +45,22 @@ body.palm-default.palm-dark {
 .article-list .read .article-title {
 }
 
-.cacheButton {
+.actionButton .list-selector-triangle {
+	background: none !important;
+}
+
+.actionButton .list-selector-value {
+	display: none;
+}
+
+.actionButton {
 	background: url(../images/details-button.png) top center no-repeat;
 	height: 52px;
 	width: 35px;
 	float: right;
 }
 
-.cacheButton.selected{
+.actionButton.selected{
 	background: url(../images/details-button-press.png) top center no-repeat;
 }
 

@@ -109,7 +109,7 @@ MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
 	$A(this.controller.select('.cacheButton')).each(function(item, index) {
 		if (item.stopListening) {
-			Mojo.Event.stopListening(item, Mojo.Event.tap, this.detailsPopupHandler);
+			Mojo.Event.stopListening(item, Mojo.Event.propertyChange, this.detailsPopupHandler);
 		}
 	}, this);
 };
@@ -199,7 +199,7 @@ MainAssistant.prototype.showItems = function(state) {
 	this.controller.instantiateChildWidgets(document);
 	$A(this.controller.select('.cacheButton')).each(function(item, index) {
 		if (!item.stopListening) {
-			Mojo.Event.listen(item, Mojo.Event.tap, this.detailsPopupHandler);
+			Mojo.Event.listen(item, Mojo.Event.propertyChange, this.detailsPopupHandler);
 		}
 	}, this);
 };
@@ -344,9 +344,13 @@ var AddBookmarkAssistant = Class.create({
 
 MainAssistant.prototype.detailsPopup = function(event) {
 	// the intent is to have a popup list display when the details button is tapped
-	debugString('DO DETAILS POPUP');
-	// for now just caching the page
-	this.cachePage(event);
+	switch (event.value) {
+		case 'cache':
+			this.cachePage(event);
+			break;
+		default:
+			break;
+	}
 	event.stop();
 };
 
