@@ -83,6 +83,10 @@ MainAssistant.prototype.setup = function()
 			// TODO: Replace console.log with proper error handling
 			console.log("error: "+Object.toJSON(err));
 		});
+
+        this.facebookFailure1 = this.facebookFailure1.bind(this);
+        this.facebookFailure2 = this.facebookFailure2.bind(this);
+
 	};
 	
 MainAssistant.prototype.activate = function (event) {
@@ -352,9 +356,11 @@ MainAssistant.prototype.detailsPopup = function(event) {
 				case 'markRead':
 					// @TODO
 					// this.markAsRead(item);
+					break;
 				case 'markUnread':
 					// @TODO
 					// this.markAsUnread(item);
+					break;
 				case 'fbShare':
 					// @TODO
 					this.shareOnFacebook(item);
@@ -477,4 +483,40 @@ MainAssistant.prototype.getArticles = function() {
 		console.log("error: "+Object.toJSON(err));
 	});
 
+};
+
+MainAssistant.prototype.shareOnFacebook = function(item) {
+    that = this;
+    this.controller.serviceRequest("palm://com.palm.applicationManager", {
+        method: "launch",
+        parameters:  {
+            id: 'com.palm.app.facebook',
+            params: {
+                status: 'Check out this link: ' + item.title +
+                    ' -- ' + item.url
+            }
+        },
+        onFailure: function() {
+            that.facebookFailure1(item);
+        }
+    });
+};
+
+MainAssistant.prototype.facebookFailure1 = function(item) {
+    this.controller.serviceRequest("palm://com.palm.applicationManager", {
+        method: "launch",
+        parameters:  {
+            id: 'com.palm.app.facebook.beta',
+            params: {
+                status: 'Check out this link: ' + item.title +
+                ' -- ' + item.url
+            }
+        },
+        onFailure: this.facebookFailure2
+    });
+};
+
+MainAssistant.prototype.facebookFailure2 = function(event) {
+    Mojo.Controller.getAppController().showBanner("Facebook app not installed!",
+        {source: 'notification'});
 };
