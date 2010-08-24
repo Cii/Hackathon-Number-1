@@ -5,7 +5,7 @@ Relego = {}; // global namespace for Relego for webOS
 Relego.db = {
 	'info': {
 		'name': 'ext:Relego',
-		'version': '1.1'
+		'version': '1.0'
 	},
 	'dbColumn': function(definition) {
 	    var that = {}, sql;

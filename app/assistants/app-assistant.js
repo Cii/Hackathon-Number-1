@@ -26,6 +26,7 @@ function AppAssistant(appController){
 AppAssistant.prototype.setup = function(){
 	//this.handleLaunch();
 	Relego.Metrix = new Metrix();
+	//Relego.Database	= dbInstance({'name': Relego.db.info.name, 'version': Relego.db.info.version});	//--> Our database; use Relego.Database.get_connection()
 	this.getPrefs();
 	// set service type
 	API.setService(API.SERVICE_READ_IT_LATER);
@@ -212,4 +213,18 @@ AppAssistant.prototype.createDbSchema = function() {
 		]
 	});
 	Relego.Database.add_table(pagesTable);
+	/* this will fix errors that arose due to changes in the schema after the beta was made available
+	 * it seems that merely changing the db 'version' fails to create a new Mojo db and future schema
+	 * changes will probably require something more involved than this
+	 */
+	Relego.Database.get_connection().transaction(function(transaction) {
+		transaction.executeSql("ALTER TABLE pages ADD COLUMN lastUpdate INTEGER", [], 
+													function(transaction, results) {
+														
+													}.bind(this),
+													function(transaction, error) {
+														// this will happen if the column already exists, safe to ignore that one
+													}.bind(this)
+		);
+	}); // end schema fix
 };
