@@ -3,21 +3,21 @@
  * 
  * Example:
  * 
- * 	var ril = new ReadItLater({
- *  	username  :'foo',
- *  	'password':'bar',
- *  	'apikey'  :'XXXXXXXXXXXXXXXXXXXXXXXXX'
- *  });
- *  
- *  ril.add({
- *  	'url':'http://www.cerias.purdue.edu/',
- *  	onSuccess:function(resp_data, xhr) {
- *  		alert('yay! '+resp_data);
- *  	},
- *  	onFailure:function(err_obj, xhr) {
- *  		alert('nay! '+err_obj.message+'\n'+err_obj.description);
- *  	}
- *  });
+ *	var ril = new ReadItLater({
+ *		username	:'foo',
+ *		'password':'bar',
+ *		'apikey'	:'XXXXXXXXXXXXXXXXXXXXXXXXX'
+ *	});
+ *	
+ *	ril.add({
+ *		'url':'http://www.cerias.purdue.edu/',
+ *		onSuccess:function(resp_data, xhr) {
+ *			alert('yay! '+resp_data);
+ *		},
+ *		onFailure:function(err_obj, xhr) {
+ *			alert('nay! '+err_obj.message+'\n'+err_obj.description);
+ *		}
+ *	});
  * 
  * As written, this library requires PrototypeJS. see ReadItLater._defaults and ReadItLater._getMethodUrl
  * 
@@ -77,7 +77,7 @@ ReadItLater.prototype.getCredentials = function() {
 ReadItLater.prototype.setCredentials = function(username, password, apikey) {
 	this.opts.username = username;
 	this.opts.password = password;
-	this.opts.apikey   = apikey;
+	this.opts.apikey	 = apikey;
 };
 
 
@@ -103,7 +103,7 @@ ReadItLater.prototype.add = function(opts) {
 		'title':opts.title
 	};
 	
-	params = this.addCredentialsToParams(params);
+	params = this._addCredentialsToParams(params);
 	
 	this._callMethod({
 		'method':'add',
@@ -135,7 +135,7 @@ ReadItLater.prototype.send = function(opts) {
 		'update_tags':opts.update_tags
 	};
 	
-	params = this.addCredentialsToParams(params);
+	params = this._addCredentialsToParams(params);
 	
 	this._callMethod({
 		'method':'add',
@@ -171,7 +171,7 @@ ReadItLater.prototype.get = function(opts) {
 		'tags':opts.tags
 	};
 	
-	params = this.addCredentialsToParams(params);
+	params = this._addCredentialsToParams(params);
 	
 	this._callMethod({
 		'method':'get',
@@ -194,44 +194,16 @@ ReadItLater.prototype.stats = function(opts) {};
  * @TODO
  */
 ReadItLater.prototype.authenticate = function(opts) {
- var that = this, method_url = this._getMethodUrl("authenticate");
 
-  opts = this._defaults({
-    'method':'authenticate',
-    'http_method':'post',
-    'onSuccess':null,
-    'onFailure':null,
-    'parseResponse':true
-  }, opts);
-
-  opts.params = "username=#{username}&password=#{password}&apikey=#{apikey}".interpolate({
-    username: opts.username,
-    password: opts.password,
-    apikey: API.apiKey
-  });
-
-  new Ajax.Request(method_url, {
-    'method'   : opts.http_method,
-    'parameters' : opts.params,
-    'onSuccess'  : function (transport) {
-      if (opts.onSuccess) {
-        opts.onSuccess(transport);
-      }
-    },
-    'onFailure'  : function(transport) {
-      var status_code   = transport.status;
-      var error_message = that.status_codes[status_code] || 'Unknown Error';
-      var error_desc = transport.transport.getResponseHeader('X-Error') || null;
-
-      if (opts.onFailure) {
-        opts.onFailure({
-          code: status_code,
-          message: error_message,
-          description: error_desc
-        });
-      }
-    }
-  });
+	var params = this._addCredentialsToParams({});
+	
+	this._callMethod({
+		'method':'authenticate',
+		'params':params,
+		'onSuccess':opts.onSuccess,
+		'onFailure':opts.onFailure,
+		'parseResponse':true
+	});
 
 };
 
@@ -239,7 +211,20 @@ ReadItLater.prototype.authenticate = function(opts) {
  * Register a new user 
  * @TODO
  */
-ReadItLater.prototype.signup = function(opts) {};
+ReadItLater.prototype.signup = function(opts) {
+
+	var params = this._addCredentialsToParams({});
+
+	this._callMethod({
+		'method':'signup',
+		'params':params,
+		'onSuccess':opts.onSuccess,
+		'onFailure':opts.onFailure,
+		'parseResponse':true
+	});
+
+
+};
 
 /**
  * Get the text only version of a url 
@@ -254,7 +239,7 @@ ReadItLater.prototype.text = function(opts) {};
 ReadItLater.prototype.api = function(opts) {};
 
 /**
- * does the heavy lifting for API method calls
+ * does the heavy lifting for API method calls.
  */
 ReadItLater.prototype._callMethod = function(opts) {
 	var that = this;
@@ -270,11 +255,13 @@ ReadItLater.prototype._callMethod = function(opts) {
 
 	var method_url = this._getMethodUrl(opts.method);
 
+	Mojo.Log.info('Requesting '+method_url);
 	
 	new Ajax.Request(method_url, {
 		'method'	 : opts.http_method,
 		'parameters' : opts.params,
 		'onSuccess'	 : function(transport) {
+			Mojo.Log.info('Successful response to '+method_url+': '+transport.responseText);
 			if (opts.parseResponse) {
 				try {
 					var resp_data = JSON.parse(transport.responseText);
@@ -290,9 +277,13 @@ ReadItLater.prototype._callMethod = function(opts) {
 			}
 		},
 		'onFailure'	 : function(transport) {
-			var status_code	  = transport.status;
-			var error_message = that.status_codes[status_code] || 'Unknown Error';
-			var error_desc	  = transport.transport.getResponseHeader('X-Error') || null;
+			Mojo.Log.error(transport.responseText);
+			var status_code		= transport.status;
+			var error_message 	= that.status_codes[status_code] || 'Unknown Error';
+			var error_desc		= transport.transport.getResponseHeader('X-Error') || null;
+			
+			Mojo.Log.info('Failed response to '+method_url+': '+status_code);
+			Mojo.Log.info('Failed response to '+method_url+': '+error_desc);
 			
 			if (opts.onFailure) {
 				opts.onFailure.call(that, {'code':status_code, 'message':error_message, 'description':error_desc}, transport);
@@ -318,11 +309,11 @@ ReadItLater.prototype._getMethodUrl = function(method) {
 /**
  * takes a hash of params and inserts the username, password and apikey 
  */
-ReadItLater.prototype.addCredentialsToParams = function(params) {
+ReadItLater.prototype._addCredentialsToParams = function(params) {
 	var credentials = this.getCredentials();
 	params.username = credentials.username;
 	params.password = credentials.password;
-	params.apikey	= credentials.apikey;
+	params.apikey = credentials.apikey;
 	return params;
 };
 
@@ -336,45 +327,4 @@ ReadItLater.prototype._defaults = function(defaults, args) {
 	return new_args;
 };
 
-ReadItLater.prototype.signup = function(opts) {
 
- var that = this, method_url = this._getMethodUrl("signup");
-
-  opts = this._defaults({
-    'method':'signup',
-    'http_method':'get',
-    'onSuccess':null,
-    'onFailure':null,
-    'parseResponse':true
-  }, opts);
-
-  opts.params = "username=#{username}&password=#{password}&apikey=#{apikey}".interpolate({
-    username: opts.username,
-    password: opts.password,
-    apikey: API.apiKey
-  });
-
-  new Ajax.Request(method_url, {
-    'method'   : opts.http_method,
-    'parameters' : opts.params,
-    'onSuccess'  : function (transport) {
-      if (opts.onSuccess) {
-        opts.onSuccess(null);
-      }
-    },
-    'onFailure'  : function(transport) {
-      var status_code   = transport.status;
-      var error_message = that.status_codes[status_code] || 'Unknown Error';
-      var error_desc = transport.transport.getResponseHeader('X-Error') || null;
-
-      if (opts.onFailure) {
-        opts.onFailure({
-          code: status_code,
-          message: error_message,
-          description: error_desc
-        });
-      }
-    }
-  });
-
-};
