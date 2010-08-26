@@ -95,15 +95,26 @@ AuthAssistant.prototype = {
 
     // setup the service/library - now in app assistant
   //  API.setService(API.SERVICE_READ_IT_LATER);
+	if (this.user.username && this.user.password) {
+		// logging the user in
+		if (this.checkbox.value === false) {
+			API.verifyAccount(this.user, this.authSuccess.bind(this), this.authFail.bind(this));
+			
+		// creating a new account
+		}
+		else 
+			if (this.checkbox.value === true) {
+				API.createAccount(this.user, this.registerSuccess.bind(this), this.registerFail.bind(this));
+			}
+	}
+	else {
+		var window = Mojo.Controller.getAppController().getActiveStageController().activeScene().window;
+		Mojo.Controller.errorDialog("Please enter both username and password!", window);
+	    this.controller.get('spinnerScrim').hide();
+	    this.spinnerModel.spinning = false;
+	    this.controller.modelChanged(this.spinnerModel);
 
-    // logging the user in
-    if (this.checkbox.value === false) {
-      API.verifyAccount(this.user, this.authSuccess.bind(this), this.authFail.bind(this));
-
-    // creating a new account
-    } else if (this.checkbox.value === true) {
-      API.createAccount(this.user, this.registerSuccess.bind(this), this.registerFail.bind(this));
-    }
+	}
 
   },
 
