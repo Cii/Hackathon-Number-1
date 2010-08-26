@@ -113,8 +113,7 @@ AuthAssistant.prototype = {
 	Relego.prefsCookie = new Mojo.Model.Cookie(Mojo.appInfo.title + ".prefs");
     Relego.prefsCookie.put(Relego.prefs);
     // Checking to see if we got here from launch, else we got here from preferences
-    // This doesn't work!  Not sure why...
-    if(Mojo.Controller.getAppController().getActiveStageController().topScene() === this.controller)
+    if(Mojo.Controller.getAppController().getActiveStageController().getScenes()[0] === this.controller)
       this.controller.stageController.swapScene("main");
     else
       this.controller.stageController.popScene();
@@ -139,8 +138,7 @@ AuthAssistant.prototype = {
     Relego.prefsCookie.put(Relego.prefs);
 
     // Checking to see if we got here from launch, else we got here from preferences
-    // This doesn't work!  Not sure why...
-    if(Mojo.Controller.getAppController().getActiveStageController().topScene() === this.controller)
+    if(Mojo.Controller.getAppController().getActiveStageController().getScenes()[0] === this.controller)
       this.controller.stageController.swapScene("main");
     else
       this.controller.stageController.popScene();

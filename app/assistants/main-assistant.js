@@ -87,10 +87,18 @@ MainAssistant.prototype.setup = function()
         this.facebookFailure1 = this.facebookFailure1.bind(this);
         this.facebookFailure2 = this.facebookFailure2.bind(this);
 
+		this.lastUsername = API.user.username;
 	};
 	
 MainAssistant.prototype.activate = function (event) {
 	//Mojo.Log.info("Rotate:", Relego.prefs.allowRotate);
+	if(this.lastUsername !== API.user.username) {
+		API.getAllBookmarks(this.setArticles.bind(this), function(err) {
+			// TODO: Replace console.log with proper error handling
+			console.log("error: "+Object.toJSON(err));
+		});
+		this.lastUsername = API.user.username;
+	}
 	if (Relego.prefs.allowRotate) {
 		this.controller.stageController.setWindowOrientation("free");
 	}

@@ -14,7 +14,6 @@ PrefsAssistant.prototype.setup = function() {
 	this.controller.get('appOptionsTitle').innerHTML = $L("Display Settings");
 		
 	this.controller.get('accountOptionsTitle').innerHTML = $L("Account Settings");
-	this.controller.get('AccountId').innerHTML = $L("Username:") + " " + Relego.prefs.username;
 
 	/* use Mojo.View.render to render view templates and add them to the scene, if needed */
 	
@@ -116,6 +115,8 @@ PrefsAssistant.prototype.activate = function(event) {
 	/* put in event handlers here that should only be in effect when this scene is active. For
 	   example, key handlers that are observing the document */
 	
+	// username could change!
+	this.controller.get('AccountId').innerHTML = $L("Username:") + " " + Relego.prefs.username;
 	// for the secret thing
 	this.imageViewer.mojo.manualSize(Mojo.Environment.DeviceInfo.screenWidth, Mojo.Environment.DeviceInfo.screenHeight - 50);
 	
