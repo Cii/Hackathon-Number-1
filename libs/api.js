@@ -140,18 +140,22 @@ var API = {
       onSuccess : function(inResponse) {
        var bookmarks = [ ];
 	   var list = inResponse.list;
-       for(var id = 0; id < list.length; id++) {
-		  var b = list[id];
-          var bookmark = {}
-          bookmark.itemID = b.item_id;
-          bookmark.title = b.title;
-          bookmark.url = b.url;
-          bookmark.timeAdded = b.time_added;
-          bookmark.readStatus = b.state;
-          bookmark.tags = b.tags;
-		  console.log(b.title);
-          bookmarks.push(new Bookmark(bookmark));
-        }
+	  
+	   if(list.length !== 0) {   // Read It Later may return empty array when no articles!
+		for(var id in list) {
+		   console.log(id);
+		   var b = list[id];
+		   var bookmark = {}
+		   bookmark.itemID = b.item_id;
+		   bookmark.title = b.title;
+		   bookmark.url = b.url;
+		   bookmark.timeAdded = b.time_added;
+		   bookmark.readStatus = b.state;
+		   bookmark.tags = b.tags;
+		   console.log(b.title);
+		   bookmarks.push(new Bookmark(bookmark));
+		  }
+		}
         inSuccess(bookmarks);
       },
       onFailure : inFailure
