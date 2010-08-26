@@ -76,7 +76,7 @@ AuthAssistant.prototype = {
 
   changeBtn: function (event) {
     var temp = event.value ? "Create Account" : "Log In";
-    temp = $L("temp");
+    temp = $L(temp);
     this.button.label = temp;
     this.controller.modelChanged(this.button);
   },
@@ -112,16 +112,24 @@ AuthAssistant.prototype = {
 	Relego.prefs.password = this.user.password;
 	Relego.prefsCookie = new Mojo.Model.Cookie(Mojo.appInfo.title + ".prefs");
     Relego.prefsCookie.put(Relego.prefs);
-    this.controller.stageController.swapScene("main");
+    // Checking to see if we got here from launch, else we got here from preferences
+    // This doesn't work!  Not sure why...
+    if(Mojo.Controller.getAppController().getActiveStageController().topScene() === this.controller)
+      this.controller.stageController.swapScene("main");
+    else
+      this.controller.stageController.popScene();
   },
 
   authFail: function (code, message, description) {
+    this.spinnerModel.spinning = false;
+    this.controller.modelChanged(this.spinnerModel);
+    this.controller.get('spinnerScrim').hide();
     
     // login unsuccessful (password or username incorrect)
-    if (code === "401") {
-      this.controller.showErrorDialog($L("You've provided an incorrect username or password. Please try again."));
+    if (code === 401) {
+      var window = Mojo.Controller.getAppController().getActiveStageController().activeScene().window;
+      Mojo.Controller.errorDialog($L("You've provided an incorrect username or password. Please try again."), window);
     }
-
   },
 
   registerSuccess: function () {
@@ -129,19 +137,26 @@ AuthAssistant.prototype = {
 	Relego.prefs.password = this.user.password;
 	Relego.prefsCookie = new Mojo.Model.Cookie(Mojo.appInfo.title + ".prefs");
     Relego.prefsCookie.put(Relego.prefs);
-    this.controller.stageController.swapScene("main");
+
+    // Checking to see if we got here from launch, else we got here from preferences
+    // This doesn't work!  Not sure why...
+    if(Mojo.Controller.getAppController().getActiveStageController().topScene() === this.controller)
+      this.controller.stageController.swapScene("main");
+    else
+      this.controller.stageController.popScene();
   },
 
   registerFail: function (code, message, description) {
 
-    // the username is already taken
-    if (code === "401") {
-      this.controller.showErrorDialog($L("This username is already taken. Please try again."));
-    }
-
     this.spinnerModel.spinning = false;
     this.controller.modelChanged(this.spinnerModel);
     this.controller.get('spinnerScrim').hide();
+
+    // the username is already taken
+    if (code === 401) {
+      var window = Mojo.Controller.getAppController().getActiveStageController().activeScene().window;
+      Mojo.Controller.errorDialog($L("This username is already taken. Please try again."), window);
+    }
   }
 
 };

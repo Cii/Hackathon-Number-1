@@ -108,7 +108,10 @@ var API = {
   createAccount : function(inUser, inSuccess, inFailure) {
 	
 	this.user = inUser;
+	var that = this;
 
+    this.library.setCredentials(this.user.username, this.user.password,
+      this.apiKey);
     this.library.signup({
       username : this.user.username,
       password : this.user.password,
@@ -116,6 +119,7 @@ var API = {
         inSuccess(true);
       },
       onFailure : function(inResponse) {
+		that.library.setCredentials("","");
         inFailure(inResponse.code, inResponse.message, inResponse.description);
       }
     });
@@ -136,6 +140,7 @@ var API = {
       onSuccess : function(inResponse) {
        var bookmarks = [ ];
 	   var list = inResponse.list;
+	   // For/in bad!
        for(var id in list) {
 		  var b = list[id];
           var bookmark = {}
