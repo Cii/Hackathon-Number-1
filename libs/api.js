@@ -140,8 +140,7 @@ var API = {
       onSuccess : function(inResponse) {
        var bookmarks = [ ];
 	   var list = inResponse.list;
-	   // For/in bad!
-       for(var id in list) {
+       for(var id = 0; id < list.length; id++) {
 		  var b = list[id];
           var bookmark = {}
           bookmark.itemID = b.item_id;
