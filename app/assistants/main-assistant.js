@@ -215,11 +215,11 @@ MainAssistant.prototype.filterArticles = function(filterString, listWidget, offs
 }; 
 
 MainAssistant.prototype.listTap = function(event) {
-	if (event.originalEvent.target.hasClassName('actionButton')) {
+	if (event.originalEvent.target && event.originalEvent.target.hasClassName('actionButton')) {
 		// do details popup
 		this.detailsPopup(event.originalEvent);
 		// stop event
-		event.stop();
+		//event.stop();
 		return;
 	}
 	var launchParams = {
@@ -333,7 +333,6 @@ var AddBookmarkAssistant = Class.create({
 });
 
 MainAssistant.prototype.detailsPopup = function(event) {
-	// item.itemID, item.url, item.title, item.tags
 	var item = this.controller.get('article-list').mojo.getItemByNode(event.target);
 
 	var popupItems = [
@@ -358,8 +357,12 @@ MainAssistant.prototype.detailsPopup = function(event) {
 		onChoose: function(value){
 			switch(value){
 				case 'open':
-					// @TODO
-					this.openUrl(item.url);
+					// building a fake event to send back to listTap for url open
+					event.item = item;
+					event.originalEvent = {
+						'target': null
+					};
+					this.listTap(event);
 					break;
 				case 'markRead':
 					// @TODO
@@ -386,7 +389,7 @@ MainAssistant.prototype.detailsPopup = function(event) {
 		placeNear: near,
 		items: popupItems
 	});
-
+	
 	event.stop();
 };
 
