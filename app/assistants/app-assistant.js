@@ -53,7 +53,8 @@ AppAssistant.prototype.handleLaunch = function(launchParams){
 				if (cardStageController) {
 					Mojo.Log.info("*** --> cardStageController = TRUE. Launch Main");
 					// If it exists, just bring it to the front by focusing its window.
-					cardStageController.popScenesTo(sceneToPush);
+					// if card stage already open, don't need popScenesTo - haeffb 2010-08-26
+					//cardStageController.popScenesTo(sceneToPush);
 					cardStageController.activate();
 				}else{
 					Mojo.Log.info("*** --> cardStageController = FALSE. Launch Main");

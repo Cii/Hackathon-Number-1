@@ -5,6 +5,7 @@ function SplashAssistant() {
 SplashAssistant.prototype.setup = function() {
 	var prefs = Relego.prefs;
 	if (prefs.username) {
+		Mojo.Log.info("verifying auth");
 		API.verifyAccount(prefs, this.authSuccess.bind(this), this.authFail.bind(this));
 	}
 	else {
