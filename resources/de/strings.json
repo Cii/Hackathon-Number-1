@@ -45,5 +45,9 @@
 	"Add Bookmark" : "Lesezeichen hinzufügen",
 	"Cache page" : "Seite cachen",
 	"Delete page" : "Seite löschen",
-	"Delete cache" : "Cache löschen"
+	"Delete cache" : "Cache löschen",
+	"Open" : "Anzeigen",
+	"Share on Facebook" : "Auf Facebook veröff.",
+	"Facebook app not installed!" : "Facebook App ist nicht installiert!",
+	"Mark as Read" : "Als gelesen markieren"
 }

@@ -528,6 +528,6 @@ MainAssistant.prototype.facebookFailure1 = function(item) {
 };
 
 MainAssistant.prototype.facebookFailure2 = function(event) {
-    Mojo.Controller.getAppController().showBanner("Facebook app not installed!",
+    Mojo.Controller.getAppController().showBanner($L('Facebook app not installed!'),
         {source: 'notification'});
 };
