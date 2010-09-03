@@ -503,7 +503,7 @@ MainAssistant.prototype.shareOnFacebook = function(item) {
         parameters:  {
             id: 'com.palm.app.facebook',
             params: {
-                status: 'Check out this link: ' + item.title +
+                status: $L('Check out this link: ') + item.title +
                     ' -- ' + item.url
             }
         },
@@ -519,7 +519,7 @@ MainAssistant.prototype.facebookFailure1 = function(item) {
         parameters:  {
             id: 'com.palm.app.facebook.beta',
             params: {
-                status: 'Check out this link: ' + item.title +
+                status: $L('Check out this link: ') + item.title +
                 ' -- ' + item.url
             }
         },
