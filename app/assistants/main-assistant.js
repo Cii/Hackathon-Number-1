@@ -19,6 +19,13 @@ MainAssistant.prototype.setup = function()
 			items: [Mojo.Menu.prefsItem, Mojo.Menu.helpItem]
 		});
 		
+		// setup the spinner
+		this.controller.setupWidget("largeSpinner", {
+            spinnerSize: "large"
+        }, this.largeSpinnerModel = {
+            spinning: false
+        });
+
 		this.controller.setupWidget("article-list", {
 			itemTemplate: "main/relegoRowTemplate",
 			reorderable: false,
@@ -79,6 +86,8 @@ MainAssistant.prototype.setup = function()
 			}
 		);
 		
+		
+		this.toggleSpinner("start");
 		API.getAllBookmarks(this.setArticles.bind(this), function(err) {
 			// TODO: Replace console.log with proper error handling
 			console.log("error: "+Object.toJSON(err));
@@ -193,6 +202,7 @@ MainAssistant.prototype.showItems = function(state) {
 	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
 	this.controller.instantiateChildWidgets(document);
 	
+	this.toggleSpinner("stop");
 };
 
 MainAssistant.prototype.filterArticles = function(filterString, listWidget, offset, count)
@@ -489,6 +499,9 @@ MainAssistant.prototype.getCachedProperty = function(item) {
 };
 
 MainAssistant.prototype.getArticles = function() {
+	
+	this.toggleSpinner("start");
+	
 	API.getAllBookmarks(this.setArticles.bind(this), function(err) {
 		// TODO: Replace console.log with proper error handling
 		console.log("error: "+Object.toJSON(err));
@@ -530,4 +543,17 @@ MainAssistant.prototype.facebookFailure1 = function(item) {
 MainAssistant.prototype.facebookFailure2 = function(event) {
     Mojo.Controller.getAppController().showBanner("Facebook app not installed!",
         {source: 'notification'});
+};
+
+MainAssistant.prototype.toggleSpinner = function(action) {
+	// if action == stop, stop spinner, all other values starts spinning
+	if (action == "stop") {
+		this.largeSpinnerModel.spinning = false;
+		this.controller.get("main-scrim").hide();
+		this.controller.modelChanged(this.largeSpinnerModel);
+	} else {
+		this.largeSpinnerModel.spinning = true;
+		this.controller.get("main-scrim").show();
+		this.controller.modelChanged(this.largeSpinnerModel);
+	}
 };
