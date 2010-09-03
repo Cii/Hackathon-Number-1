@@ -516,7 +516,7 @@ MainAssistant.prototype.shareOnFacebook = function(item) {
         parameters:  {
             id: 'com.palm.app.facebook',
             params: {
-                status: 'Check out this link: ' + item.title +
+                status: $L('Check out this link: ') + item.title +
                     ' -- ' + item.url
             }
         },
@@ -532,7 +532,7 @@ MainAssistant.prototype.facebookFailure1 = function(item) {
         parameters:  {
             id: 'com.palm.app.facebook.beta',
             params: {
-                status: 'Check out this link: ' + item.title +
+                status: $L('Check out this link: ') + item.title +
                 ' -- ' + item.url
             }
         },
@@ -541,19 +541,6 @@ MainAssistant.prototype.facebookFailure1 = function(item) {
 };
 
 MainAssistant.prototype.facebookFailure2 = function(event) {
-    Mojo.Controller.getAppController().showBanner("Facebook app not installed!",
+    Mojo.Controller.getAppController().showBanner($L('Facebook app not installed!'),
         {source: 'notification'});
-};
-
-MainAssistant.prototype.toggleSpinner = function(action) {
-	// if action == stop, stop spinner, all other values starts spinning
-	if (action == "stop") {
-		this.largeSpinnerModel.spinning = false;
-		this.controller.get("main-scrim").hide();
-		this.controller.modelChanged(this.largeSpinnerModel);
-	} else {
-		this.largeSpinnerModel.spinning = true;
-		this.controller.get("main-scrim").show();
-		this.controller.modelChanged(this.largeSpinnerModel);
-	}
 };
