@@ -18,7 +18,8 @@ Relego.prefs = {
 	email: "", //Shouldn't be needed, kept to ensure I don't break stuff.
     allowRotate: false,
 	theme: "dark",
-	open: "unread"
+	open: "unread",
+	openMarksRead: true
 };
 
 function AppAssistant(appController){
