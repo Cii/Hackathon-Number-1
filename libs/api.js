@@ -173,9 +173,11 @@ var API = {
    * @param inFailure  Callback function for a failed call.
    */
   addBookmark : function(inBookmark, inSuccess, inFailure) {
+  	var objToAdd = {url: inBookmark.url, title: inBookmark.title};
 
     var opts = {
-      "new" : inBookmark.toJSON(),
+      // "new" : inBookmark.toJSON(),
+	  "new": Object.toJSON({"0": objToAdd}),
       onSuccess : inSuccess,
       onFailure : inFailure
     };
@@ -217,8 +219,9 @@ var API = {
    * @param inFailure  Callback function for a failed call.
    */
   markBookmarkRead : function(inBookmark, inSuccess, inFailure) {
+  	var objToRead = {url: inBookmark.url};
   	var opts = {
-		"read": inBookmark.toJSON(),
+		read: Object.toJSON({"0": objToRead}),
 		onSuccess: inSuccess,
 		onFailure: inFailure
 	};

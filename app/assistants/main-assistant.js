@@ -243,12 +243,16 @@ MainAssistant.prototype.listTap = function(event) {
         parameters: launchParams
     });
 
-	API.markBookmarkRead(event.item, onSuccess.bind(this), function(){});
-	function onSuccess(){
-		API.getAllBookmarks(this.setArticles.bind(this), function(err) {
-			console.log("error: "+err);
-		});
-	}
+    // mark only as read when set in Prefs.
+    if (Relego.prefs.openMarksRead === true) {
+    	API.markBookmarkRead(event.item, onSuccess.bind(this), function(){});
+    	function onSuccess(){
+    		API.getAllBookmarks(this.setArticles.bind(this), function(err) {
+    			console.log("error: "+err);
+    		});
+    	}
+    }
+    
 	// launch read scene
 }; 
 
@@ -353,7 +357,7 @@ MainAssistant.prototype.detailsPopup = function(event) {
 	if (item.readStatus == 0) {
 		popupItems.push({label: $L("Mark as Read"), command: 'markRead'});
 	} else if (item.readStatus == 1) {
-		popupItems.push({label: $L("Mark as Unread"), command: 'markUnead'});
+		popupItems.push({label: $L("Mark as Unread"), command: 'markUnread'});
 	}
 	
 	if (!item.cached) {
@@ -375,15 +379,24 @@ MainAssistant.prototype.detailsPopup = function(event) {
 					this.listTap(event);
 					break;
 				case 'markRead':
-					// @TODO
 					// this.markAsRead(item);
+					API.markBookmarkRead(item, onSuccess.bind(this), function(){});
+					function onSuccess(){
+						API.getAllBookmarks(this.setArticles.bind(this), function(err) {
+							console.log("error: "+err);
+						});
+					}
 					break;
 				case 'markUnread':
-					// @TODO
 					// this.markAsUnread(item);
+					API.addBookmark(item, onSuccess.bind(this), function(){});
+					function onSuccess(){
+						API.getAllBookmarks(this.setArticles.bind(this), function(err) {
+							console.log("error: "+err);
+						});
+					}
 					break;
 				case 'fbShare':
-					// @TODO
 					this.shareOnFacebook(item);
 					break;
 				case 'cache': 

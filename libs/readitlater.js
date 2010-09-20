@@ -138,7 +138,7 @@ ReadItLater.prototype.send = function(opts) {
 	params = this._addCredentialsToParams(params);
 	
 	this._callMethod({
-		'method':'add',
+		'method':'send',
 		'params':params,
 		'onSuccess':opts.onSuccess,
 		'onFailure':opts.onFailure,
@@ -262,6 +262,7 @@ ReadItLater.prototype._callMethod = function(opts) {
 		'parameters' : opts.params,
 		'onSuccess'	 : function(transport) {
 			Mojo.Log.info('Successful response to '+method_url+': '+transport.responseText);
+			Mojo.Log.info('Transport was: %j', transport.request);
 			if (opts.parseResponse) {
 				try {
 					var resp_data = JSON.parse(transport.responseText);

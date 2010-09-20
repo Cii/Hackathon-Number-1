@@ -55,14 +55,28 @@ PrefsAssistant.prototype.setup = function() {
 		}
 	);
 	
-	this.toggleAttributes = {
+	this.openMarksReadToggleAttributes = {
+		trueLabel: $L('Yes'),
+		falseLabel: $L('No')
+	};
+	// Add option to mark item as read on open or not
+	this.controller.setupWidget('openMarksReadToggleId',
+		this.openMarksReadToggleAttributes,
+		this.openMarksReadModel = {
+			value: Relego.prefs.openMarksRead,
+			disabled: false			
+		});
+	this.controller.get('openMarksReadLabel').innerHTML = $L("Open marks item as read");
+
+	
+	this.allowRotateToggleAttributes = {
 		trueLabel: $L('Yes'),
 		falseLabel: $L('No')
 	};
 
 	// Add allow Landscape toggle
 	this.controller.setupWidget('allowRotateToggleId',
-		this.toggleAttributes,
+		this.allowRotateToggleAttributes,
 		this.allowRotateModel = {
 			value: Relego.prefs.allowRotate,
 			disabled: false			
@@ -128,6 +142,7 @@ PrefsAssistant.prototype.deactivate = function(event) {
 
 	// Store preferences in global prefs object
 	Relego.prefs.allowRotate = this.allowRotateModel.value;
+	Relego.prefs.openMarksRead = this.openMarksReadModel.value;
 	Relego.prefs.theme = this.themeSelectorModel.value;
 	Relego.prefs.open = this.openSelectorModel.value;
 	
