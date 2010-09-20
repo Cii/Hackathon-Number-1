@@ -544,3 +544,16 @@ MainAssistant.prototype.facebookFailure2 = function(event) {
     Mojo.Controller.getAppController().showBanner($L('Facebook app not installed!'),
         {source: 'notification'});
 };
+
+MainAssistant.prototype.toggleSpinner = function(action) {
+	// if action == stop, stop spinner, all other values starts spinning
+	if (action == "stop") {
+		this.largeSpinnerModel.spinning = false;
+		this.controller.get("main-scrim").hide();
+		this.controller.modelChanged(this.largeSpinnerModel);
+	} else {
+		this.largeSpinnerModel.spinning = true;
+		this.controller.get("main-scrim").show();
+		this.controller.modelChanged(this.largeSpinnerModel);
+	}
+};
