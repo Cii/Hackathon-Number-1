@@ -87,25 +87,21 @@ MainAssistant.prototype.setup = function()
 		);
 		
 		
-		this.toggleSpinner("start");
-		API.getAllBookmarks(this.setArticles.bind(this), function(err) {
-			// TODO: Replace console.log with proper error handling
-			console.log("error: "+Object.toJSON(err));
-		});
-
+		this.setArticles = this.setArticles.bind(this);
+		this.getArticles = this.getArticles.bind(this);
         this.facebookFailure1 = this.facebookFailure1.bind(this);
         this.facebookFailure2 = this.facebookFailure2.bind(this);
 
 		this.lastUsername = API.user.username;
+		
+		this.getArticles();
+
 	};
 	
 MainAssistant.prototype.activate = function (event) {
 	//Mojo.Log.info("Rotate:", Relego.prefs.allowRotate);
 	if(this.lastUsername !== API.user.username) {
-		API.getAllBookmarks(this.setArticles.bind(this), function(err) {
-			// TODO: Replace console.log with proper error handling
-			console.log("error: "+Object.toJSON(err));
-		});
+		this.getArticles();
 		this.lastUsername = API.user.username;
 	}
 	if (Relego.prefs.allowRotate) {
@@ -164,16 +160,14 @@ MainAssistant.prototype.handleCommand = function(event) {
 				var dialogModel={
 					template: 'main/add-bookmark-dialog',
 					// assistant: new AddBookmarkAssistant(this, this.showItems.bind(this)),
-					assistant: new AddBookmarkAssistant(this, this.getArticles.bind(this)),
+					assistant: new AddBookmarkAssistant(this, this.getArticles),
 					preventCancel: false
 				};
 				this.controller.showDialog(dialogModel);
 			break;
 			
 			case "refreshBookmarks":
-				API.getAllBookmarks(this.setArticles.bind(this), function(err) {
-					console.log("error: "+ Object.toJSON(err));
-				});
+				this.getArticles();
 			break;
 			
 			
@@ -192,15 +186,17 @@ MainAssistant.prototype.setArticles = function(articles) {
 };
 	
 MainAssistant.prototype.showItems = function(state) {
-	if(state)
-		this.currentState = state;
+	var updateLocation = (state !== this.currentState);	
+	this.currentState = state;
 		
-	var filtered = state == undefined ? this.allItems : this.allItems.findAll(function(i) { return i.readStatus == state; });
+	var filtered = (state == undefined) ? this.allItems : this.allItems.findAll(function(i) { return i.readStatus == state; });
 	this.articleModel.items = filtered;
 	//this.controller.modelChanged(this.articleModel, this);
 	
 	this.controller.get("article-list").mojo.setLengthAndInvalidate(this.articleModel.items.length);
 	this.controller.instantiateChildWidgets(document);
+	if(updateLocation)
+		this.controller.get("article-list").mojo.revealItem(0, false);
 	
 	this.toggleSpinner("stop");
 };
@@ -245,12 +241,7 @@ MainAssistant.prototype.listTap = function(event) {
 
     // mark only as read when set in Prefs.
     if (Relego.prefs.openMarksRead === true) {
-    	API.markBookmarkRead(event.item, onSuccess.bind(this), function(){});
-    	function onSuccess(){
-    		API.getAllBookmarks(this.setArticles.bind(this), function(err) {
-    			console.log("error: "+err);
-    		});
-    	}
+    	API.markBookmarkRead(event.item, this.getArticles, function(){});
     }
     
 	// launch read scene
@@ -380,21 +371,11 @@ MainAssistant.prototype.detailsPopup = function(event) {
 					break;
 				case 'markRead':
 					// this.markAsRead(item);
-					API.markBookmarkRead(item, onSuccess.bind(this), function(){});
-					function onSuccess(){
-						API.getAllBookmarks(this.setArticles.bind(this), function(err) {
-							console.log("error: "+err);
-						});
-					}
+					API.markBookmarkRead(item, this.getArticles, function(){});
 					break;
 				case 'markUnread':
 					// this.markAsUnread(item);
-					API.addBookmark(item, onSuccess.bind(this), function(){});
-					function onSuccess(){
-						API.getAllBookmarks(this.setArticles.bind(this), function(err) {
-							console.log("error: "+err);
-						});
-					}
+					API.addBookmark(item, this.getArticles, function(){});
 					break;
 				case 'fbShare':
 					this.shareOnFacebook(item);
