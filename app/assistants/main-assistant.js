@@ -40,7 +40,7 @@ MainAssistant.prototype.setup = function()
 		
 		// Filter
 		this.filterViewsHandler = this.filterViews.bind(this);
-		this.controller.listen(this.controller.get("filterView"), Mojo.Event.tap, this.filterViewsHandler);
+		this.controller.listen("filterView", Mojo.Event.tap, this.filterViewsHandler);
 		this.chosen = Relego.prefs.open; //'unread'; //preference;
 		this.currentState = (Relego.prefs.open == 'all')?undefined:this.currentState;
 		Mojo.Log.info("current="+this.chosen);
@@ -114,6 +114,7 @@ MainAssistant.prototype.activate = function (event) {
 };
 
 MainAssistant.prototype.cleanup = function() {
+	this.controller.stopListening("filterView", Mojo.Event.tap, this.filterViewsHandler);
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
 };
 
