@@ -102,7 +102,14 @@ PrefsAssistant.prototype.setup = function() {
 	this.changeThemeHandler = this.changeTheme.bindAsEventListener(this);
 	this.controller.listen('themeSelectorId', Mojo.Event.propertyChange, this.changeThemeHandler);
 
+	this.resizeHandler = this.resizeHandler.bindAsEventListener(this);
+	this.controller.listen(this.controller.window, 'resize', this.resizeHandler, false);
+	this.resizeHandler();
 };
+
+PrefsAssistant.prototype.resizeHandler = function(event) {
+	this.controller.get("mojo-scene-prefs-scene-scroller").style.width = this.controller.window.innerWidth + "px";
+}
 
 PrefsAssistant.prototype.changeTheme = function (event) {
 	// Change theme based on prefs (required in each scene!

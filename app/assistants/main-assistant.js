@@ -96,8 +96,11 @@ MainAssistant.prototype.setup = function()
 		
 		this.getArticles();
 
-	};
-	
+	this.resizeHandler = this.resizeHandler.bindAsEventListener(this);
+	this.controller.listen(this.controller.window, 'resize', this.resizeHandler, false);
+	this.resizeHandler();
+};
+
 MainAssistant.prototype.activate = function (event) {
 	//Mojo.Log.info("Rotate:", Relego.prefs.allowRotate);
 	if(this.lastUsername !== API.user.username) {
@@ -118,6 +121,10 @@ MainAssistant.prototype.cleanup = function() {
 	this.controller.stopListening("article-list", Mojo.Event.listTap, this.listTap);
 };
 
+MainAssistant.prototype.resizeHandler = function(event) {
+	this.controller.get("mojo-scene-main-scene-scroller").style.width = this.controller.window.innerWidth + "px";
+}
+	
 MainAssistant.prototype.filterViews = function(event) {
 	var filterItems = [
 		{label: $L("All"), command: 'all'},
