@@ -1,0 +1,7 @@
+{
+    "id": "com.webosroundup.relego",
+    "version": "0.3.1",
+    "main": "../../index.html",
+    "icon": "../../icon.png",
+    "smallicon": "../../icon32x32.png",
+}
